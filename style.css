@@ -132,3 +132,10 @@ footer {
     max-width: 800px;
     padding: 20px;
 }
+.hero-texto h2 {
+    font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.hero-texto p {
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+}
