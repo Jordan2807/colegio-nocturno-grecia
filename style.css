@@ -90,6 +90,7 @@ footer {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
     text-align: center;
     align-items: center;
     justify-content: center;
@@ -162,31 +163,37 @@ footer {
 
 /* LAYOUT DE VALORES */
 .layout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-    padding: 20px;
+    display: flex;
+    gap: 20px; /* separación entre izquierda y derecha */
+    margin: 40px 0;
 }
 
 /* cuadro grande izquierda */
 .titulo {
-    background: white;
-    color: black;
-    padding: 30px;
-    border-radius: 10px;
+    flex: 1;
+    background: #e0e0e0;
+    border-radius: 12px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 /* columna derecha */
 .lista {
+    flex: 2;
     display: grid;
-    gap: 15px;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 15px; /* separación entre cuadros */
 }
 
 /* cuadros pequeños */
 .box {
+    background: #f2f2f2;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
-    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
