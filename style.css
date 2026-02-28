@@ -73,7 +73,7 @@ footer {
 }
 
 /* CUADROS */
-cuadro {
+.cuadro {
     width: 45%;              /* ocupa la mitad de la pantalla */
     background-color: #002b5c; /* color de fondo */
     padding: 20px;           /* espacio interno */
@@ -83,7 +83,7 @@ cuadro {
 }
 
 /* CONTENEDOR DE CUADROS*/
-contenedor {
+.contenedor {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
