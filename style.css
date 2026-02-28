@@ -27,7 +27,7 @@ header {
 }
 
 .icono-grande {
-    font-size: 3rem;
+    font-size: 6rem;
     transition: transform 0.3s, color 0.3s;
 }
 
@@ -151,9 +151,9 @@ footer {
     padding: 20px;
 }
 .hero-texto h2 {
-    font-size: clamp(3rem, 5vw, 4rem);
+    font-size: clamp(6rem, 10vw, 8rem);
 }
 
 .hero-texto p {
-    font-size: clamp(1.5rem, 2.5vw, 1.8rem);
+    font-size: clamp(3rem, 5vw, 4rem);
 }
