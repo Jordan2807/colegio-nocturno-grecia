@@ -96,12 +96,11 @@ footer {
 /* HERO reutilizable */
 .hero {
     position: relative;
-    height: 100vh;
-    overflow: hidden;
+    height: 100vh; /* ocupa toda la pantalla */
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
+    overflow: hidden;
 }
 
 /* Imagen como fondo */
@@ -129,4 +128,7 @@ footer {
     position: relative;
     z-index: 2;
     text-align: center;
+    color: white;
+    max-width: 800px;
+    padding: 20px;
 }
