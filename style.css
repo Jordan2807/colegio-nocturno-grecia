@@ -26,6 +26,9 @@ header {
     margin-right: 15px;
 }
 
+.icon {
+    width: 60px;
+}
 /* NAVEGACIÓN */
 nav a {
     color: white;
