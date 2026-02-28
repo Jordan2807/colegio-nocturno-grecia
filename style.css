@@ -119,7 +119,6 @@ footer {
 /* Imagen visible */
 .hero-img.active {
     opacity: 1;
-    transform: scale(1.05);
 }
 
 /* Capa oscura */
