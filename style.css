@@ -21,6 +21,18 @@ header {
     flex-wrap: nowrap;
     gap: 50%;
 }
+/* RESPONSIVE – TELÉFONOS*/
+
+@media (max-width: 768px) {
+
+    /* HEADER */
+    header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+    }
+}
 
 /* LOGO Y TITULO */
 .logo-container {
@@ -28,9 +40,18 @@ header {
     align-items: center;
 }
 
+
 .logo {
     width: 60px;
     margin-right: 15px;
+}
+
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+
+    .logo-container {
+        justify-content: center;
+    }
 }
 
 .icono-grande {
@@ -55,6 +76,17 @@ nav a:hover {
     color: #ffd700;
 }
 
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+    
+    nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+}
+
 /* BOTÓN AULA VIRTUAL DESTACADO */
 .btn-aula {
     background-color: #ffd700;
@@ -70,6 +102,14 @@ nav a:hover {
 /* CONTENIDO */
 main {
      padding-top: 120px; 
+}
+
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+    /* ESPACIADO DEL MAIN POR HEADER */
+    main {
+        padding-top: 160px;
+    }
 }
 
 section {
@@ -120,6 +160,21 @@ footer {
     gap: 20px;
     justify-content: center;
     padding: 20px;
+}
+
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+
+    /* CUADROS HISTORIA */
+    .contenedor {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cuadro-titulo,
+    .cuadro-texto {
+        max-width: 90%;
+    }
 }
 
 /* IMAGEN DE FONDO */
@@ -178,6 +233,18 @@ footer {
     font-size: clamp(1.5rem, 2.5vw, 2rem);
 }
 
+@media (max-width: 768px) {
+
+    /* HERO */
+    .hero-texto h2 {
+        font-size: 2rem;
+    }
+
+    .hero-texto p {
+        font-size: 1.1rem;
+    }
+}
+
 /* LAYOUT DE VALORES */
 .layout {
     display: flex;
@@ -213,6 +280,19 @@ footer {
     text-align: center;
     font-size: 1.2rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+
+    /* LAYOUT VALORES */
+    .layout {
+        flex-direction: column;
+    }
+
+    .lista {
+        grid-template-columns: 1fr; /* una sola columna */
+    }
 }
 
 /* Estilo de contacto*/
@@ -251,3 +331,18 @@ footer {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+/* RESPONSIVE – TELÉFONOS*/
+@media (max-width: 768px) {
+    
+    /* CONTACTO */
+    .contacto-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .contacto-item {
+        width: 90%;
+    }
+}
+
