@@ -19,6 +19,7 @@ header {
     justify-content:center;
     align-items: center;
     flex-wrap: nowrap;
+    margin-left: 20%;
 }
 
 /* LOGO Y TITULO */
