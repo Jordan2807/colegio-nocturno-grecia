@@ -17,6 +17,7 @@ header {
     z-index: 1000;     /* se mantiene por encima del contenido */
     display: flex;
     justify-content: space-between;
+    align-items: center;
     flex-wrap: nowrap;
 }
 
