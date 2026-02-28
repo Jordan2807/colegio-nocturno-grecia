@@ -76,8 +76,8 @@ footer {
 .cuadro {
     flex: 1;                 /* permite que se ajusten automáticamente */
     max-width: 45%;          /* evita que ocupen toda la fila */
-    background-color: #002b5c;
-    color: white;
+    background-color: rgb(235, 225, 225);
+    color: black;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -92,3 +92,41 @@ footer {
     padding: 20px;
 }
 
+/* IMAGEN DE FONDO */
+/* HERO reutilizable */
+.hero {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* Imagen como fondo */
+.hero-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ajusta la imagen sin deformarla */
+    z-index: 0;
+}
+
+/* Capa oscura */
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1;
+}
+
+/* Texto */
+.hero-texto {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
