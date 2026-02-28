@@ -76,7 +76,7 @@ footer {
 .cuadro {
     flex: 1;                 /* permite que se ajusten automáticamente */
     max-width: 45%;          /* evita que ocupen toda la fila */
-    background-color: rgb(235, 225, 225);
+    background-color: white;
     color: black;
     padding: 20px;
     border-radius: 10px;
@@ -112,6 +112,14 @@ footer {
     height: 100%;
     object-fit: cover; /* ajusta la imagen sin deformarla */
     z-index: 0;
+    opacity: 0;
+    transition: opacity 1s easi-in-out;
+}
+
+/* Imagen visible */
+.hero-img.active {
+    opacity: 1;
+    transform: scale(1.05);
 }
 
 /* Capa oscura */
