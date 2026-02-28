@@ -84,7 +84,7 @@ footer {
 /* CUADROS */
 .cuadro {
     flex: 1;                 /* permite que se ajusten automáticamente */
-    max-width: 45%;          /* evita que ocupen toda la fila */
+    width: 35%;          /* evita que ocupen toda la fila */
     background-color: white;
     color: black;
     padding: 20px;
@@ -96,6 +96,7 @@ footer {
 /* CONTENEDOR DE CUADROS*/
 .contenedor {
     display: flex;
+    flex-wrap: wrap;   /* permite salto de línea */
     gap: 20px;
     justify-content: center;
     padding: 20px;
