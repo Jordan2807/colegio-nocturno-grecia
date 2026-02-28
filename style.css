@@ -45,7 +45,7 @@ header {
 nav a {
     color: white;
     text-decoration: none;
-    margin-left: 15px;
+    margin-left: 50px;
     font-weight: bold;
     transition: 0.3s;
 }
