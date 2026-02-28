@@ -26,9 +26,15 @@ header {
     margin-right: 15px;
 }
 
-.icon {
-    width: 60px;
+.icono-grande {
+    font-size: 3rem;
+    transition: transform 0.3s, color 0.3s;
 }
+
+.icono-grande:hover {
+    transform: scale(1.2);
+} 
+
 /* NAVEGACIÓN */
 nav a {
     color: white;
@@ -144,9 +150,9 @@ footer {
     padding: 20px;
 }
 .hero-texto h2 {
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: clamp(3rem, 5vw, 4rem);
 }
 
 .hero-texto p {
-    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    font-size: clamp(1.5rem, 2.5vw, 1.8rem);
 }
