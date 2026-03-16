@@ -7,8 +7,8 @@ body {
 
 /* HEADER */
 header {
-    background-color: #002b5c;
-    color: white;
+    background-color: white;
+    color: #002b5c;
     padding: 15px 20px;
     position: fixed;   /* lo fija en la pantalla */
     top: 0;            /* pegado arriba */
