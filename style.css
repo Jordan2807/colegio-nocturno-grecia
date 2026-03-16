@@ -296,6 +296,19 @@ footer {
     }
 }
 
+.mapa-seccion {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.mapa-container {
+    max-width: 1000px;
+    margin: auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
 /* Estilo de contacto*/
 .contacto-seccion {
     background: #f5f5f5;
