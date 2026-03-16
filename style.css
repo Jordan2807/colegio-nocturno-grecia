@@ -88,6 +88,14 @@ nav a:hover {
     }
 }
 
+/* BOTONES DE NAEGACION  */
+.btn-nav {
+    background-color: #002b5c;
+    color: #ffffff !important;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
 /* BOTÓN AULA VIRTUAL DESTACADO */
 .btn-aula {
     background-color: #ffd700;
