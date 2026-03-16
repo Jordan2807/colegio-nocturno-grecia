@@ -7,8 +7,8 @@ body {
 
 /* HEADER */
 header {
-    background-color: white;
-    color: #002b5c;
+    background-color:  #002b5c;
+    color: white;
     padding: 15px 20px;
     position: fixed;   /* lo fija en la pantalla */
     top: 0;            /* pegado arriba */
@@ -88,13 +88,7 @@ nav a:hover {
     }
 }
 
-/* BOTONES DE NAEGACION  */
-.btn-nav {
-    background-color: #002b5c;
-    color: #ffffff !important;
-    padding: 8px 15px;
-    border-radius: 5px;
-}
+
 
 /* BOTÓN AULA VIRTUAL DESTACADO */
 .btn-aula {
