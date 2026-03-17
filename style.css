@@ -18,7 +18,7 @@ header {
     display: flex;
     justify-content:center;
     align-items: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 8%;
 }
 /* RESPONSIVE – TELÉFONOS*/
@@ -31,6 +31,7 @@ header {
         align-items: center;
         gap: 10px;
         text-align: center;
+        flex-wrap: wrap;
     }
 }
 
@@ -75,6 +76,7 @@ nav a {
 
 nav a:hover {
     color: #ffd700;
+    flex-wrap: nowrap;
 }
 
 /* RESPONSIVE – TELÉFONOS*/
@@ -82,7 +84,7 @@ nav a:hover {
     
     nav {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
         gap: 10px;
     }
