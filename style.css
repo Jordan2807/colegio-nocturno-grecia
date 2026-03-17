@@ -66,6 +66,7 @@ header {
 
 /* NAVEGACIÓN */
 nav a {
+    display: flex;
     color: white;
     text-decoration: none;
     margin-right: 20px;
@@ -73,6 +74,7 @@ nav a {
     transition: 0.3s;
     flex-wrap: nowrap;
     gap: 10px;
+    
 }
 
 nav a:hover {
