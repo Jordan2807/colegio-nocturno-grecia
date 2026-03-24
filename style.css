@@ -423,3 +423,25 @@ footer {
 .btn-login:hover {
     background-color: #004a99;
 }
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    width: 100%;
+    padding: 12px;
+    padding-right: 40px;
+}
+
+.password-container i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+}
+.password-container i:hover {
+    color: #002b5c;
+}
