@@ -426,12 +426,14 @@ footer {
 
 .password-container {
     position: relative;
+    width: 100%;
 }
 
 .password-container input {
     width: 100%;
     padding: 12px;
     padding-right: 40px;
+    box-sizing: border-box;
 }
 
 .password-container i {
@@ -444,4 +446,8 @@ footer {
 }
 .password-container i:hover {
     color: #002b5c;
+}
+
+* {
+    box-sizing: border-box;
 }
