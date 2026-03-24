@@ -14,10 +14,10 @@
         </div>
 
         <nav>
-            <a href="#inicio"class=>Inicio</a>
-            <a href="#nosotros"class=>Nosotros</a>
-            <a href="#contactenos"class= >Contáctenos</a>
-            <a href="#"class="btn-aula" >Aula Virtual</a>
+            <a href="index.html#inicio"class=>Inicio</a>
+            <a href="index.html#nosotros"class=>Nosotros</a>
+            <a href="index.html#contactenos"class= >Contáctenos</a>
+            <a href="aula.html"class="btn-aula" >Aula Virtual</a>
         </nav>
     </header>
     <main>
@@ -31,10 +31,12 @@
  <footer>
         <p>© 2026 Colegio Nocturno de Grecia - Todos los derechos reservados</p>
     </footer>
-<script src="script.js"></script> 
+<script src="script.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* CONFIGURACIÓN */
 const firebaseConfig = {
@@ -47,25 +49,48 @@ const firebaseConfig = {
   measurementId: "G-3RXFB7KELK"
 };
 
-/* INICIALIZAR FIREBASE */
+/* INICIALIZAR */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-/* FUNCIÓN LOGIN */
-window.login = function () {
+/* LOGIN */
+window.login = async function () {
+
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-        alert("Login correcto");
+    try {
 
-        // roles
-        window.location.href = "profesor.html";
-    })
-    .catch((error) => {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // buscar rol en Firestore
+        const docRef = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+
+            const rol = docSnap.data().rol;
+
+            if (rol === "admin") {
+                window.location.href = "admin.html";
+            }
+            else if (rol === "profesor") {
+                window.location.href = "profesor.html";
+            }
+            else {
+                alert("Usuario sin rol válido");
+            }
+
+        } else {
+            alert("Usuario no registrado en base de datos");
+        }
+
+    } catch (error) {
         alert("Error: " + error.message);
-    });
+    }
+
 }
 </script>
 </body>
