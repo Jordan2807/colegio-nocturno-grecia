@@ -370,3 +370,55 @@ footer {
     }
 }
 
+/* CONTENEDOR LOGIN */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+/* CAJA LOGIN */
+.login-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    width: 300px;
+    text-align: center;
+}
+
+/* INPUTS */
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* BOTONES */
+.login-botones {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* BOTON */
+.btn-login {
+    flex: 1;
+    background-color: #002b5c;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #004a99;
+}
