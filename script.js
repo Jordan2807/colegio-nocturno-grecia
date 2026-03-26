@@ -1,17 +1,29 @@
 /*FIREBASE CONFIGURACIÓN*/
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+getAuth, 
+createUserWithEmailAndPassword, 
+signInWithEmailAndPassword, 
+onAuthStateChanged, 
+updatePassword, 
+sendPasswordResetEmail, 
+signOut 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+getFirestore, 
+doc, 
+setDoc, 
+getDoc, 
+deleteDoc, 
+collection, 
+getDocs, 
+updateDoc, 
+query, 
+where 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
 const firebaseConfig = {
