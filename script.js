@@ -175,9 +175,6 @@ alert("Contraseña muy débil, debe contener al menos 6 caracteres");
 return;
 }
 
-// crear email falso para login con cedula
-const email = cedula + "@colegio.com";
-
 try {
 
 // primero revisar si ya existe correo real
@@ -209,7 +206,7 @@ return;
 }
 
 // crear usuario nuevo
-const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+const userCredential = await createUserWithEmailAndPassword(auth,correo,password);
 
 const user = userCredential.user;
 
