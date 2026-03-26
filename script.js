@@ -225,6 +225,8 @@ alert(mensaje);
 
 }
 
+};
+
 /* ADMIN - VER USUARIOS */
 
 import { collection, getDocs, updateDoc } 
@@ -260,6 +262,8 @@ Aprobar
 `;
 
 });
+
+};
 
 /*Admin - Aprobar usuario*/
 window.aprobar = async function(id){
