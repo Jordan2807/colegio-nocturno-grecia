@@ -451,3 +451,20 @@ footer {
 * {
     box-sizing: border-box;
 }
+
+.btn-estudiante {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #ffd700;
+    color: #002b5c;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-estudiante:hover {
+    background-color: #ffcc00;
+}
