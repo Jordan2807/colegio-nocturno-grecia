@@ -8,6 +8,7 @@ import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-fires
 import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
 const firebaseConfig = {
@@ -197,6 +198,7 @@ cedula: cedula,
 materia: materia,
 rol: "profesor",
 estado: "pendiente",
+resetPassword: "ninguno,"
 fecha: new Date()
 
 });
@@ -333,6 +335,7 @@ solicitudes.style.display = "none";
 window.addEventListener("DOMContentLoaded", () => {
 
 cargarUsuarios();
+cargarReset();
 
 });
 
@@ -370,6 +373,91 @@ estado: "activo"
 alert("Usuario activado");
 
 cargarUsuarios();
+
+};
+
+/*Admin - Aprobar Reset*/
+
+window.aprobarReset = async function(id){
+
+await updateDoc(doc(db,"usuarios",id),{
+
+resetPassword: "aprobado"
+
+});
+
+alert("Solicitud aprobada");
+
+cargarReset();
+
+};
+
+/*Reset Contraseña*/
+
+window.cargarReset = async function(){
+
+const querySnapshot = await getDocs(collection(db, "usuarios"));
+
+const contenedor = document.getElementById("reset");
+const titulo = document.getElementById("tituloReset");
+
+if(!contenedor) return;
+
+let hay = false;
+
+contenedor.innerHTML = "";
+
+querySnapshot.forEach((docu) => {
+
+const data = docu.data();
+
+if(data.resetPassword === "pendiente"){
+
+hay = true;
+
+contenedor.innerHTML += `
+
+<div class="usuario-card">
+
+<div class="usuario-datos">
+
+<div class="dato">
+<label>Nombre</label>
+<span>${data.nombre}</span>
+</div>
+
+<div class="dato">
+<label>Cédula</label>
+<span>${data.cedula}</span>
+</div>
+
+</div>
+
+<div class="usuario-botones">
+
+<button class="btn-admin btn-activar"
+onclick="aprobarReset('${docu.id}')">
+
+Aprobar
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+});
+
+if(!hay){
+
+titulo.style.display = "none";
+contenedor.style.display = "none";
+
+}
 
 };
 
@@ -444,5 +532,87 @@ window.logout = function(){
 signOut(auth).then(() => {
 window.location.href = "aula.html";
 });
+
+};
+
+/* OLVIDE PASSWORD */
+
+window.olvidePassword = async function(){
+
+const cedula = document.getElementById("cedula")?.value;
+const password = document.getElementById("password")?.value;
+const confirmPassword = document.getElementById("confirmPassword")?.value;
+
+const querySnapshot = await getDocs(collection(db, "usuarios"));
+
+let encontrado = null;
+
+querySnapshot.forEach((docu) => {
+
+const data = docu.data();
+
+if(data.cedula === cedula){
+encontrado = { id: docu.id, ...data };
+}
+
+});
+
+if(!encontrado){
+alert("Usuario no encontrado");
+return;
+}
+
+/* revisar estado */
+
+if(encontrado.resetPassword === "ninguno"){
+
+await updateDoc(doc(db,"usuarios",encontrado.id),{
+
+resetPassword: "pendiente"
+
+});
+
+alert("Solicitud enviada al administrador");
+
+return;
+
+}
+
+if(encontrado.resetPassword === "pendiente"){
+
+alert("Solicitud aún no ha sido aprobada por el administrador");
+
+return;
+
+}
+
+if(encontrado.resetPassword === "aprobado"){
+
+document.getElementById("nuevaPassword").style.display = "block";
+
+if(password && confirmPassword){
+
+if(password !== confirmPassword){
+
+alert("Las contraseñas no coinciden");
+return;
+
+}
+
+await updateDoc(doc(db,"usuarios",encontrado.id),{
+
+resetPassword: "ninguno"
+
+});
+
+await updatePassword(auth.currentUser, password);
+
+alert("Contraseña actualizada");
+
+window.location.href = "aula.html";
+
+}
+
+}
 
 };
