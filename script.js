@@ -185,52 +185,9 @@ window.location.href = "aula.html";
 
 }
 
-// crear email con cedula
-const email = cedula + "@colegio.com";
-
-try {
-
-const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-
-const user = userCredential.user;
-
-await setDoc(doc(db,"usuarios",user.uid),{
-
-nombre: nombre,
-cedula: cedula,
-materia: materia,
-rol: "profesor",
-estado: "pendiente"
-
-});
-
-alert("Solicitud enviada al administrador");
-
-window.location.href = "aula.html";
-
-}
-
 catch(error){
 
-let mensaje = "Error al registrar";
-
-switch(error.code){
-
-case "auth/weak-password":
-mensaje = "Contraseña muy débil, debe contener al menos 6 caracteres";
-break;
-
-case "auth/email-already-in-use":
-mensaje = "Este usuario ya está registrado";
-break;
-
-case "auth/invalid-email":
-mensaje = "Cédula inválida";
-break;
-
-}
-
-alert(mensaje);
+alert("Error: " + error.message);
 
 }
 
