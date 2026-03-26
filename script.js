@@ -9,6 +9,7 @@ import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-fi
 import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
 const firebaseConfig = {
@@ -160,6 +161,7 @@ window.registrar = async function() {
 const nombre = document.getElementById("nombre")?.value;
 const cedula = document.getElementById("cedula")?.value;
 const materia = document.getElementById("materia")?.value;
+const correo = document.getElementById("correo")?.value;
 const password = document.getElementById("password")?.value;
 const confirmPassword = document.getElementById("confirmPassword")?.value;
 
@@ -175,7 +177,7 @@ return;
 // crear email con cedula
 const email = cedula + "@colegio.com";
 
-if(!nombre || !cedula || !materia || !password || !confirmPassword){
+if(!nombre || !cedula || !materia || !correo || !password || !confirmPassword){
 alert("Todos los campos son obligatorios");
 return;
 }
@@ -196,6 +198,7 @@ await setDoc(doc(db,"usuarios",user.uid),{
 nombre: nombre,
 cedula: cedula,
 materia: materia,
+correo: correo,
 rol: "profesor",
 estado: "pendiente",
 resetPassword: "ninguno",
@@ -376,90 +379,6 @@ cargarUsuarios();
 
 };
 
-/*Admin - Aprobar Reset*/
-
-window.aprobarReset = async function(id){
-
-await updateDoc(doc(db,"usuarios",id),{
-
-resetPassword: "aprobado"
-
-});
-
-alert("Solicitud aprobada");
-
-cargarReset();
-
-};
-
-/*Reset Contraseña*/
-
-window.cargarReset = async function(){
-
-const querySnapshot = await getDocs(collection(db, "usuarios"));
-
-const contenedor = document.getElementById("reset");
-const titulo = document.getElementById("tituloReset");
-
-if(!contenedor) return;
-
-let hay = false;
-
-contenedor.innerHTML = "";
-
-querySnapshot.forEach((docu) => {
-
-const data = docu.data();
-
-if(data.resetPassword === "pendiente"){
-
-hay = true;
-
-contenedor.innerHTML += `
-
-<div class="usuario-card">
-
-<div class="usuario-datos">
-
-<div class="dato">
-<label>Nombre</label>
-<span>${data.nombre}</span>
-</div>
-
-<div class="dato">
-<label>Cédula</label>
-<span>${data.cedula}</span>
-</div>
-
-</div>
-
-<div class="usuario-botones">
-
-<button class="btn-admin btn-activar"
-onclick="aprobarReset('${docu.id}')">
-
-Aprobar
-
-</button>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-});
-
-if(!hay){
-
-titulo.style.display = "none";
-contenedor.style.display = "none";
-
-}
-
-};
 
 /* SEGURIDAD DE PÁGINAS*/
 
@@ -535,83 +454,29 @@ window.location.href = "aula.html";
 
 };
 
-/* OLVIDE PASSWORD */
+/*Olvide contraseña*/
 
 window.olvidePassword = async function(){
 
 const cedula = document.getElementById("cedula")?.value;
-const password = document.getElementById("password")?.value;
-const confirmPassword = document.getElementById("confirmPassword")?.value;
 
-const querySnapshot = await getDocs(collection(db, "usuarios"));
-
-let encontrado = null;
-
-querySnapshot.forEach((docu) => {
-
-const data = docu.data();
-
-if(data.cedula === cedula){
-encontrado = { id: docu.id, ...data };
+if(!cedula){
+alert("Ingrese su usuario");
+return;
 }
 
-});
+const email = cedula + "@colegio.com";
 
-if(!encontrado){
+try{
+
+await sendPasswordResetEmail(auth, email);
+
+alert("Se envió un correo para restablecer la contraseña");
+
+}
+catch(error){
+
 alert("Usuario no encontrado");
-return;
-}
-
-/* revisar estado */
-
-if(encontrado.resetPassword === "ninguno"){
-
-await updateDoc(doc(db,"usuarios",encontrado.id),{
-
-resetPassword: "pendiente"
-
-});
-
-alert("Solicitud enviada al administrador");
-
-return;
-
-}
-
-if(encontrado.resetPassword === "pendiente"){
-
-alert("Solicitud aún no ha sido aprobada por el administrador");
-
-return;
-
-}
-
-if(encontrado.resetPassword === "aprobado"){
-
-document.getElementById("nuevaPassword").style.display = "block";
-
-if(password && confirmPassword){
-
-if(password !== confirmPassword){
-
-alert("Las contraseñas no coinciden");
-return;
-
-}
-
-await updateDoc(doc(db,"usuarios",encontrado.id),{
-
-resetPassword: "ninguno"
-
-});
-
-await updatePassword(auth.currentUser, password);
-
-alert("Contraseña actualizada");
-
-window.location.href = "aula.html";
-
-}
 
 }
 
