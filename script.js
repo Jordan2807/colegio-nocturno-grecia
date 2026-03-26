@@ -265,6 +265,7 @@ Aprobar
 
 };
 
+
 /*Admin - Aprobar usuario*/
 window.aprobar = async function(id){
 
@@ -278,10 +279,12 @@ alert("Usuario aprobado");
 
 cargarUsuarios();
 
+};
+
+
 /*Admin - Cargar Usuarios*/
 window.addEventListener("DOMContentLoaded", () => {
 
 cargarUsuarios();
 
-
-};
+});
