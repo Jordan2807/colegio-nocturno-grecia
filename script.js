@@ -97,19 +97,29 @@ alert("Ingrese cédula y contraseña");
 return;
 }
 
-const email = cedula + "@colegio.com";
-
 try {
 
+// buscar usuario por cedula
+const q = query(
+collection(db,"usuarios"),
+where("cedula","==",cedula)
+);
+
+const querySnapshot = await getDocs(q);
+
+if(querySnapshot.empty){
+alert("Usuario no encontrado");
+return;
+}
+
+const docUsuario = querySnapshot.docs[0];
+const data = docUsuario.data();
+
+const email = data.correo;
+
+// login con correo real
 const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-const user = userCredential.user;
-const docRef = doc(db, "usuarios", user.uid);
-const docSnap = await getDoc(docRef);
-
-if (docSnap.exists()) {
-
-const data = docSnap.data();
 const rol = data.rol;
 const estado = data.estado;
 
@@ -119,54 +129,16 @@ return;
 }
 
 if (rol === "admin") {
-
 window.location.href = "admin.html";
-
 }
 else if (rol === "profesor") {
-
 window.location.href = "profesor.html";
-
-}
-else {
-
-alert("Usuario sin rol válido");
-
 }
 
 }
-else {
+catch(error){
 
-alert("Usuario no registrado en base de datos");
-
-}
-
-}
-catch (error) {
-
-let mensaje = "Error al iniciar sesión";
-
-switch(error.code){
-
-case "auth/user-not-found":
-mensaje = "Usuario no existe";
-break;
-
-case "auth/wrong-password":
-mensaje = "Contraseña incorrecta";
-break;
-
-case "auth/invalid-credential":
-mensaje = "Cédula o contraseña incorrecta";
-break;
-
-case "auth/too-many-requests":
-mensaje = "Demasiados intentos. Intente más tarde";
-break;
-
-}
-
-alert(mensaje);
+alert("Cédula o contraseña incorrecta");
 
 }
 
@@ -223,7 +195,7 @@ const docExistente = querySnapshot.docs[0];
 const data = docExistente.data();
 
 // enviar reset contraseña
-await sendPasswordResetEmail(auth, data.cedula + "@colegio.com");
+await sendPasswordResetEmail(auth, data.correo);
 
 // enviar solicitud admin
 await updateDoc(doc(db,"usuarios",docExistente.id),{
