@@ -69,11 +69,12 @@ this.classList.toggle("fa-eye-slash");
 
 window.login = async function () {
 
-const email = document.getElementById("email")?.value;
+const cedula = document.getElementById("email")?.value;
+const email = cedula + "@colegio.com";
 const password = document.getElementById("password")?.value;
 
 // evitar ejecutar en otras páginas
-if(!email) return;
+if(!cedula) return;
 
 try {
 
