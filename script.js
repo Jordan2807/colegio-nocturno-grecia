@@ -123,8 +123,18 @@ const userCredential = await signInWithEmailAndPassword(auth, email, password);
 const rol = data.rol;
 const estado = data.estado;
 
-if(estado !== "activo"){
+if(estado == "pendiente"){
 alert("Tu cuenta está pendiente de aprobación");
+return;
+}
+
+if(estado == "inactivo"){
+alert("Tu cuenta está inactiva, contacte al administrador");
+return;
+}
+
+if(estado == "eliminado"){
+alert("Tu cuenta fue eliminada, vuelve a registrarte otra vez");
 return;
 }
 
