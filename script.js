@@ -10,6 +10,8 @@ import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebase
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
 const firebaseConfig = {
@@ -76,10 +78,14 @@ this.classList.toggle("fa-eye-slash");
 window.login = async function () {
 
 const cedula = document.getElementById("email")?.value;
-const email = cedula + "@colegio.com";
 const password = document.getElementById("password")?.value;
 
-if(!cedula) return;
+if(!cedula || !password){
+alert("Ingrese cédula y contraseña");
+return;
+}
+
+const email = cedula + "@colegio.com";
 
 try {
 
@@ -168,17 +174,15 @@ const confirmPassword = document.getElementById("confirmPassword")?.value;
 // evitar ejecutar en otras páginas
 if(!nombre) return;
 
-// validar contraseñas
-if(password !== confirmPassword){
-alert("Las contraseñas no coinciden");
+// campos obligatorios
+if(!nombre || !cedula || !materia || !correo || !password || !confirmPassword){
+alert("Todos los campos son obligatorios");
 return;
 }
 
-// crear email con cedula
-const email = cedula + "@colegio.com";
-
-if(!nombre || !cedula || !materia || !correo || !password || !confirmPassword){
-alert("Todos los campos son obligatorios");
+// validar contraseñas
+if(password !== confirmPassword){
+alert("Las contraseñas no coinciden");
 return;
 }
 
@@ -187,8 +191,40 @@ alert("Contraseña muy débil, debe contener al menos 6 caracteres");
 return;
 }
 
+// crear email falso para login con cedula
+const email = cedula + "@colegio.com";
+
 try {
 
+// primero revisar si ya existe correo real
+
+const q = query(
+collection(db,"usuarios"),
+where("correo","==",correo)
+);
+
+const querySnapshot = await getDocs(q);
+
+if(!querySnapshot.empty){
+
+const docExistente = querySnapshot.docs[0];
+const data = docExistente.data();
+
+// enviar reset contraseña
+await sendPasswordResetEmail(auth, data.cedula + "@colegio.com");
+
+// enviar solicitud admin
+await updateDoc(doc(db,"usuarios",docExistente.id),{
+estado: "pendiente"
+});
+
+alert("Ya existía un usuario con ese correo. Se reseteó la contraseña y se envió solicitud al administrador");
+
+return;
+
+}
+
+// crear usuario nuevo
 const userCredential = await createUserWithEmailAndPassword(auth,email,password);
 
 const user = userCredential.user;
@@ -219,19 +255,15 @@ let mensaje = "Error al registrar";
 switch(error.code){
 
 case "auth/weak-password":
-mensaje = "Contraseña muy débil, debe contener al menos 6 caracteres";
+mensaje = "Contraseña muy débil";
 break;
 
 case "auth/email-already-in-use":
 mensaje = "Este usuario ya está registrado";
 break;
 
-case "auth/invalid-email":
-mensaje = "Cédula inválida";
-break;
-
 default:
-mensaje = "Ocurrió un error al registrar";
+mensaje = "Ocurrió un error";
 break;
 
 }
@@ -264,6 +296,8 @@ let haySolicitudes = false;
 querySnapshot.forEach((docu) => {
 
 const data = docu.data();
+
+if(data.estado === "eliminado") return;
 
 // no mostrar admin
 if(!data.nombre) return;
@@ -357,12 +391,17 @@ cargarUsuarios();
 /*Admin - Eliminar*/
 window.eliminar = async function(id){
 
-await deleteDoc(doc(db,"usuarios",id));
+if(!confirm("¿Eliminar usuario?")) return;
+
+await updateDoc(doc(db,"usuarios",id),{
+estado: "eliminado"
+});
 
 alert("Usuario eliminado");
+
 cargarUsuarios();
 
-};
+}
 
 /*Admin - Activar usuario*/
 window.aprobar = async function(id){
@@ -443,8 +482,6 @@ nombre.innerText = data.nombre;
 };
 
 /*Cerrar sesion*/
-import { signOut } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 window.logout = function(){
 
