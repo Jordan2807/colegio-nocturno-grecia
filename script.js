@@ -200,6 +200,7 @@ estado: "pendiente"
 });
 
 alert("Ya existía un usuario con ese correo. Se reseteó la contraseña y se envió solicitud al administrador");
+window.location.href = "aula.html";
 
 return;
 
@@ -483,14 +484,14 @@ alert("Ingrese su usuario");
 return;
 }
 
-const email = cedula + "@colegio.com";
+const email = correo;
 
 try{
 
-await sendPasswordResetEmail(auth, email);
+await sendPasswordResetEmail(auth, correo);
 
 alert("Se envió un correo para restablecer la contraseña");
-
+window.location.href = "aula.html";
 }
 catch(error){
 
