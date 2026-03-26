@@ -374,9 +374,9 @@ footer {
 .login-container {
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* antes center */
+    align-items: flex-start; 
     min-height: calc(100vh - 120px); 
-    padding-top: 40px;
+    padding-top: 80px;
 }
 
 /* CAJA LOGIN */

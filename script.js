@@ -43,6 +43,8 @@ imagenes[index].classList.add('active');
 
 /*VER / OCULTAR CONTRASEÑAS*/
 
+window.addEventListener("DOMContentLoaded", () => {
+
 const togglePasswords = document.querySelectorAll(".togglePassword");
 
 togglePasswords.forEach(icon => {
@@ -56,6 +58,8 @@ const type = input.getAttribute("type") === "password" ? "text" : "password";
 input.setAttribute("type", type);
 
 this.classList.toggle("fa-eye-slash");
+
+});
 
 });
 
