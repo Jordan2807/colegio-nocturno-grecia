@@ -484,7 +484,6 @@ alert("Ingrese su usuario");
 return;
 }
 
-const email = correo;
 
 try{
 
