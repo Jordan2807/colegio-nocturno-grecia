@@ -5,6 +5,8 @@ import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyBXHvRtn0tIxKGNYS9drwYhB9OXY8xYkV4",
@@ -170,6 +172,11 @@ return;
 // crear email con cedula
 const email = cedula + "@colegio.com";
 
+if(!nombre || !cedula || !materia || !password || !confirmPassword){
+alert("Todos los campos son obligatorios");
+return;
+}
+
 if(password.length < 6){
 alert("Contraseña muy débil, debe contener al menos 6 caracteres");
 return;
@@ -229,9 +236,6 @@ alert(mensaje);
 
 /* ADMIN - VER USUARIOS */
 
-import { collection, getDocs, updateDoc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 window.cargarUsuarios = async function(){
 
 const querySnapshot = await getDocs(collection(db, "usuarios"));
@@ -240,33 +244,78 @@ const contenedor = document.getElementById("usuarios");
 
 if(!contenedor) return;
 
-contenedor.innerHTML = "";
+contenedor.innerHTML = '<div class="usuarios-container"></div>';
+
+const grid = contenedor.querySelector(".usuarios-container");
 
 querySnapshot.forEach((docu) => {
 
 const data = docu.data();
 
-contenedor.innerHTML += `
-<div>
-<p>${data.nombre}</p>
-<p>${data.cedula}</p>
-<p>${data.materia}</p>
-<p>${data.estado}</p>
+// NO mostrar admin o datos undefined
+if(!data.nombre || !data.cedula || !data.materia) return;
 
-<button onclick="aprobar('${docu.id}')">
-Aprobar
+grid.innerHTML += `
+<div class="usuario-card">
+
+<div class="usuario-datos">
+<span>${data.nombre}</span>
+<span>${data.cedula}</span>
+<span>${data.materia}</span>
+<span>${data.estado}</span>
+</div>
+
+<div class="usuario-botones">
+<button class="btn-admin btn-activar" onclick="aprobar('${docu.id}')">
+Activar
 </button>
 
+<button class="btn-admin btn-inactivar" onclick="inactivar('${docu.id}')">
+Inactivar
+</button>
+
+<button class="btn-admin btn-eliminar" onclick="eliminar('${docu.id}')">
+Eliminar
+</button>
 </div>
-<hr>
+
+</div>
 `;
 
 });
 
 };
 
+/*Admin - Cargar Usuarios*/
+window.addEventListener("DOMContentLoaded", () => {
 
-/*Admin - Aprobar usuario*/
+cargarUsuarios();
+
+});
+
+/*Admin - Inactivar*/
+window.inactivar = async function(id){
+
+await updateDoc(doc(db,"usuarios",id),{
+estado: "inactivo"
+});
+
+alert("Usuario inactivado");
+cargarUsuarios();
+
+};
+
+/*Admin - Eliminar*/
+window.eliminar = async function(id){
+
+await deleteDoc(doc(db,"usuarios",id));
+
+alert("Usuario eliminado");
+cargarUsuarios();
+
+};
+
+/*Admin - Activar usuario*/
 window.aprobar = async function(id){
 
 await updateDoc(doc(db,"usuarios",id),{
@@ -275,16 +324,8 @@ estado: "activo"
 
 });
 
-alert("Usuario aprobado");
+alert("Usuario activado");
 
 cargarUsuarios();
 
 };
-
-
-/*Admin - Cargar Usuarios*/
-window.addEventListener("DOMContentLoaded", () => {
-
-cargarUsuarios();
-
-});

@@ -469,3 +469,56 @@ footer {
 .btn-estudiante:hover {
     background-color: #ffcc00;
 }
+
+/* ADMIN USUARIOS */
+
+.usuarios-container {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+gap: 20px;
+padding: 20px;
+}
+
+.usuario-card {
+background: white;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.usuario-datos {
+display: flex;
+justify-content: space-between;
+margin-bottom: 20px;
+font-weight: bold;
+font-size: 16px;
+color: #000;
+}
+
+.usuario-botones {
+display: flex;
+justify-content: center;
+gap: 10px;
+}
+
+.btn-admin {
+padding: 8px 15px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-weight: bold;
+}
+
+.btn-activar {
+background: #28a745;
+color: white;
+}
+
+.btn-inactivar {
+background: #ffc107;
+}
+
+.btn-eliminar {
+background: #dc3545;
+color: white;
+}
