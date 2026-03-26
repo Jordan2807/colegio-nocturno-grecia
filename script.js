@@ -163,6 +163,11 @@ return;
 // crear email con cedula
 const email = cedula + "@colegio.com";
 
+if(password.length < 6){
+alert("Contraseña muy débil, debe contener al menos 6 caracteres");
+return;
+}
+
 try {
 
 const userCredential = await createUserWithEmailAndPassword(auth,email,password);
