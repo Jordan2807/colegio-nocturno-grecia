@@ -376,7 +376,7 @@ footer {
     justify-content: center;
     align-items: flex-start; 
     min-height: calc(100vh - 120px); 
-    padding-top: 80px;
+    padding-top: 110px;
 }
 
 /* CAJA LOGIN */
