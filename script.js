@@ -73,7 +73,6 @@ const cedula = document.getElementById("email")?.value;
 const email = cedula + "@colegio.com";
 const password = document.getElementById("password")?.value;
 
-// evitar ejecutar en otras páginas
 if(!cedula) return;
 
 try {
@@ -81,7 +80,6 @@ try {
 const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
 const user = userCredential.user;
-
 const docRef = doc(db, "usuarios", user.uid);
 const docSnap = await getDoc(docRef);
 
@@ -115,7 +113,29 @@ alert("Usuario no registrado en base de datos");
 }
 catch (error) {
 
-alert("Error: " + error.message);
+let mensaje = "Error al iniciar sesión";
+
+switch(error.code){
+
+case "auth/user-not-found":
+mensaje = "Usuario no existe";
+break;
+
+case "auth/wrong-password":
+mensaje = "Contraseña incorrecta";
+break;
+
+case "auth/invalid-credential":
+mensaje = "Cédula o contraseña incorrecta";
+break;
+
+case "auth/too-many-requests":
+mensaje = "Demasiados intentos. Intente más tarde";
+break;
+
+}
+
+alert(mensaje);
 
 }
 
