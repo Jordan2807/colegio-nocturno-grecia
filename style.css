@@ -486,13 +486,29 @@ border-radius: 10px;
 box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.usuario-datos {
-display: flex;
-justify-content: space-between;
+.usuario-datos{
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
 margin-bottom: 20px;
+}
+
+.dato{
+text-align: center;
+}
+
+.dato label{
+display: block;
 font-weight: bold;
+font-size: 14px;
+color: #555;
+margin-bottom: 5px;
+}
+
+.dato span{
 font-size: 16px;
-color: #000;
+font-weight: bold;
+color: black;
 }
 
 .usuario-botones {
@@ -521,4 +537,12 @@ background: #ffc107;
 .btn-eliminar {
 background: #dc3545;
 color: white;
+}
+
+.titulo-admin{
+text-align: center;
+margin-top: 20px;
+margin-bottom: 20px;
+font-size: 28px;
+font-weight: bold;
 }

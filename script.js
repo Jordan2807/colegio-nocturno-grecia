@@ -259,10 +259,27 @@ grid.innerHTML += `
 <div class="usuario-card">
 
 <div class="usuario-datos">
+
+<div class="dato">
+<label>Nombre</label>
 <span>${data.nombre}</span>
+</div>
+
+<div class="dato">
+<label>Cédula</label>
 <span>${data.cedula}</span>
+</div>
+
+<div class="dato">
+<label>Materia</label>
 <span>${data.materia}</span>
+</div>
+
+<div class="dato">
+<label>Estado</label>
 <span>${data.estado}</span>
+</div>
+
 </div>
 
 <div class="usuario-botones">
