@@ -187,8 +187,24 @@ window.location.href = "aula.html";
 
 catch(error){
 
-alert("Error: " + error.message);
+let mensaje = "Error al registrar";
+
+switch(error.code){
+
+case "auth/weak-password":
+mensaje = "Contraseña muy débil, debe contener al menos 6 caracteres";
+break;
+
+case "auth/email-already-in-use":
+mensaje = "Este usuario ya está registrado";
+break;
+
+case "auth/invalid-email":
+mensaje = "Cédula inválida";
+break;
 
 }
 
-};
+alert(mensaje);
+
+}
