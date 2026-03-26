@@ -196,7 +196,8 @@ nombre: nombre,
 cedula: cedula,
 materia: materia,
 rol: "profesor",
-estado: "pendiente"
+estado: "pendiente",
+fecha: new Date()
 
 });
 
@@ -243,21 +244,30 @@ window.cargarUsuarios = async function(){
 const querySnapshot = await getDocs(collection(db, "usuarios"));
 
 const contenedor = document.getElementById("usuarios");
+const solicitudes = document.getElementById("solicitudes");
+const tituloSolicitudes = document.getElementById("tituloSolicitudes");
 
 if(!contenedor) return;
 
-contenedor.innerHTML = '<div class="usuarios-container"></div>';
+contenedor.innerHTML = "";
+solicitudes.innerHTML = "";
 
-const grid = contenedor.querySelector(".usuarios-container");
+const inicioSesion = new Date(sessionStorage.getItem("inicioAdmin"));
+
+let haySolicitudes = false;
 
 querySnapshot.forEach((docu) => {
 
 const data = docu.data();
 
-// NO mostrar admin o datos undefined
-if(!data.nombre || !data.cedula || !data.materia) return;
+// no mostrar admin
+if(!data.nombre) return;
 
-grid.innerHTML += `
+const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
+
+const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
+
+const tarjeta = `
 <div class="usuario-card">
 
 <div class="usuario-datos">
@@ -285,6 +295,7 @@ grid.innerHTML += `
 </div>
 
 <div class="usuario-botones">
+
 <button class="btn-admin btn-activar" onclick="aprobar('${docu.id}')">
 Activar
 </button>
@@ -296,12 +307,25 @@ Inactivar
 <button class="btn-admin btn-eliminar" onclick="eliminar('${docu.id}')">
 Eliminar
 </button>
+
 </div>
 
 </div>
 `;
 
+if(esNueva){
+solicitudes.innerHTML += tarjeta;
+haySolicitudes = true;
+}else{
+contenedor.innerHTML += tarjeta;
+}
+
 });
+
+if(!haySolicitudes){
+tituloSolicitudes.style.display = "none";
+solicitudes.style.display = "none";
+}
 
 };
 
@@ -370,6 +394,10 @@ const data = docSnap.data();
 if(data.rol !== rolPermitido){
 window.location.href = "aula.html";
 return;
+}
+
+if(data.rol === "admin"){
+sessionStorage.setItem("inicioAdmin", new Date());
 }
 
 document.body.style.display = "block";

@@ -546,3 +546,14 @@ margin-bottom: 20px;
 font-size: 28px;
 font-weight: bold;
 }
+
+.titulo-seccion{
+text-align: right;
+margin: 20px;
+font-size: 20px;
+font-weight: bold;
+}
+
+#solicitudes{
+margin-bottom: 30px;
+}
