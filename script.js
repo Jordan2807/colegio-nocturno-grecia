@@ -198,7 +198,7 @@ cedula: cedula,
 materia: materia,
 rol: "profesor",
 estado: "pendiente",
-resetPassword: "ninguno,"
+resetPassword: "ninguno",
 fecha: new Date()
 
 });
