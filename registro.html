@@ -20,7 +20,6 @@
             <a href="aula.html"class="btn-aula" >Aula Virtual</a>
         </nav>
     </header>
-
 <main class="login-container">
 
 <div class="login-box">
@@ -30,78 +29,28 @@
 <input type="text" id="nombre" placeholder="Nombre completo">
 <input type="text" id="cedula" placeholder="Cédula">
 <input type="text" id="materia" placeholder="Materia">
+
+<div class="password-container">
 <input type="password" id="password" placeholder="Contraseña">
+<i class="fa-solid fa-eye togglePassword"></i>
+</div>
+
+<div class="password-container">
+<input type="password" id="confirmPassword" placeholder="Confirmar contraseña">
+<i class="fa-solid fa-eye togglePassword"></i>
 
 <button class="btn-login" onclick="registrar()">Registrarse</button>
 
 </div>
 
+  
 </main>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyBXHvRtn0tIxKGNYS9drwYhB9OXY8xYkV4",
-  authDomain: "aula-virtual-colegio-f3290.firebaseapp.com",
-  projectId: "aula-virtual-colegio-f3290",
-  storageBucket: "aula-virtual-colegio-f3290.firebasestorage.app",
-  messagingSenderId: "686411550211",
-  appId: "1:686411550211:web:f9ec664b4a8d1e1067c836"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-window.registrar = async function() {
-
-const nombre = document.getElementById("nombre").value;
-const cedula = document.getElementById("cedula").value;
-const materia = document.getElementById("materia").value;
-const password = document.getElementById("password").value;
-
-/* crear email falso con cedula */
-const email = cedula + "@colegio.com";
-
-try {
-
-const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-
-const user = userCredential.user;
-
-await setDoc(doc(db,"usuarios",user.uid),{
-
-nombre: nombre,
-cedula: cedula,
-materia: materia,
-rol: "profesor",
-estado: "pendiente"
-
-});
-
-alert("Solicitud enviada al administrador");
-
-window.location.href = "aula.html";
-
-}
-
-catch(error){
-
-alert("Error: " + error.message);
-
-}
-
-}
-
-</script>
 
  <footer>
         <p>© 2026 Colegio Nocturno de Grecia - Todos los derechos reservados</p>
     </footer>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
