@@ -85,7 +85,14 @@ const docSnap = await getDoc(docRef);
 
 if (docSnap.exists()) {
 
-const rol = docSnap.data().rol;
+const data = docSnap.data();
+const rol = data.rol;
+const estado = data.estado;
+
+if(estado !== "activo"){
+alert("Tu cuenta está pendiente de aprobación");
+return;
+}
 
 if (rol === "admin") {
 
@@ -217,4 +224,60 @@ break;
 alert(mensaje);
 
 }
+
+/* ADMIN - VER USUARIOS */
+
+import { collection, getDocs, updateDoc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+window.cargarUsuarios = async function(){
+
+const querySnapshot = await getDocs(collection(db, "usuarios"));
+
+const contenedor = document.getElementById("usuarios");
+
+if(!contenedor) return;
+
+contenedor.innerHTML = "";
+
+querySnapshot.forEach((docu) => {
+
+const data = docu.data();
+
+contenedor.innerHTML += `
+<div>
+<p>${data.nombre}</p>
+<p>${data.cedula}</p>
+<p>${data.materia}</p>
+<p>${data.estado}</p>
+
+<button onclick="aprobar('${docu.id}')">
+Aprobar
+</button>
+
+</div>
+<hr>
+`;
+
+});
+
+/*Admin - Aprobar usuario*/
+window.aprobar = async function(id){
+
+await updateDoc(doc(db,"usuarios",id),{
+
+estado: "activo"
+
+});
+
+alert("Usuario aprobado");
+
+cargarUsuarios();
+
+/*Admin - Cargar Usuarios*/
+window.addEventListener("DOMContentLoaded", () => {
+
+cargarUsuarios();
+
+
 };
