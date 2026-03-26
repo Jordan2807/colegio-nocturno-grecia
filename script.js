@@ -7,6 +7,8 @@ import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/1
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 
 const firebaseConfig = {
 apiKey: "AIzaSyBXHvRtn0tIxKGNYS9drwYhB9OXY8xYkV4",
@@ -344,5 +346,62 @@ estado: "activo"
 alert("Usuario activado");
 
 cargarUsuarios();
+
+};
+
+/* SEGURIDAD DE PÁGINAS*/
+
+window.protegerPagina = function(rolPermitido){
+
+onAuthStateChanged(auth, async (user) => {
+
+if(!user){
+window.location.href = "aula.html";
+return;
+}
+
+const docRef = doc(db, "usuarios", user.uid);
+const docSnap = await getDoc(docRef);
+
+if(docSnap.exists()){
+
+const data = docSnap.data();
+
+if(data.rol !== rolPermitido){
+
+window.location.href = "aula.html";
+
+}
+
+}
+
+});
+
+};
+
+/* DATOS PROFESOR */
+
+window.cargarDatosProfesor = function(){
+
+onAuthStateChanged(auth, async (user) => {
+
+if(!user) return;
+
+const docRef = doc(db, "usuarios", user.uid);
+const docSnap = await getDoc(docRef);
+
+if(docSnap.exists()){
+
+const data = docSnap.data();
+
+const nombre = document.getElementById("nombreProfesor");
+
+if(nombre){
+nombre.innerText = data.nombre;
+}
+
+}
+
+});
 
 };
