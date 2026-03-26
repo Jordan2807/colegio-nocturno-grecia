@@ -368,10 +368,11 @@ if(docSnap.exists()){
 const data = docSnap.data();
 
 if(data.rol !== rolPermitido){
-
 window.location.href = "aula.html";
-
+return;
 }
+
+document.body.style.display = "block";
 
 }
 
@@ -402,6 +403,18 @@ nombre.innerText = data.nombre;
 
 }
 
+});
+
+};
+
+/*Cerrar sesion*/
+import { signOut } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+window.logout = function(){
+
+signOut(auth).then(() => {
+window.location.href = "aula.html";
 });
 
 };
