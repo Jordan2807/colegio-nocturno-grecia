@@ -289,7 +289,7 @@ const tarjeta = `
 
 <div class="dato">
 <label>Estado</label>
-<span>${data.estado}</span>
+<span>${data.estado.charAt(0).toUpperCase() + data.estado.slice(1)}</span>
 </div>
 
 </div>
