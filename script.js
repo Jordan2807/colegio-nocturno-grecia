@@ -185,6 +185,31 @@ window.location.href = "aula.html";
 
 }
 
+// crear email con cedula
+const email = cedula + "@colegio.com";
+
+try {
+
+const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+
+const user = userCredential.user;
+
+await setDoc(doc(db,"usuarios",user.uid),{
+
+nombre: nombre,
+cedula: cedula,
+materia: materia,
+rol: "profesor",
+estado: "pendiente"
+
+});
+
+alert("Solicitud enviada al administrador");
+
+window.location.href = "aula.html";
+
+}
+
 catch(error){
 
 let mensaje = "Error al registrar";
@@ -207,4 +232,4 @@ break;
 
 alert(mensaje);
 
-}
+};
