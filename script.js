@@ -477,10 +477,10 @@ window.location.href = "aula.html";
 
 window.olvidePassword = async function(){
 
-const cedula = document.getElementById("cedula")?.value;
+const correo = document.getElementById("correo")?.value;
 
-if(!cedula){
-alert("Ingrese su usuario");
+if(!correo){
+alert("Ingrese su correo");
 return;
 }
 
@@ -494,7 +494,7 @@ window.location.href = "aula.html";
 }
 catch(error){
 
-alert("Usuario no encontrado");
+alert("Correo no encontrado");
 
 }
 
