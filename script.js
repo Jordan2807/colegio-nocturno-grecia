@@ -514,9 +514,10 @@ cargarUsuarios();
 };
 
 
+
 /* SEGURIDAD DE PÁGINAS*/
 
-window.protegerPagina = function(rolPermitido){
+window.protegerPagina = function(...rolesPermitidos){
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -532,11 +533,13 @@ if(docSnap.exists()){
 
 const data = docSnap.data();
 
-if(data.rol !== rolPermitido){
+// Permitir múltiples roles
+if(!rolesPermitidos.includes(data.rol)){
 window.location.href = "aula.html";
 return;
 }
 
+// Guardar inicio admin
 if(data.rol === "admin"){
 sessionStorage.setItem("inicioAdmin", new Date());
 }

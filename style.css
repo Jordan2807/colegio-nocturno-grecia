@@ -568,9 +568,23 @@ margin-bottom: 30px;
 }
 
 .btn-nuevo-admin{
-width: 60%;
+width: 40%;
 background: #FFD700;
 color: #0033A0;
+padding: 15px;
+font-size: 18px;
+font-weight: bold;
+border: none;
+cursor: pointer;
+margin: 20px auto;
+display: block;
+border-radius: 8px;
+}
+
+.btn-profesor{
+width: 40%;
+background: #002b5c;
+color: #ffffff;
 padding: 15px;
 font-size: 18px;
 font-weight: bold;
