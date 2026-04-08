@@ -661,8 +661,8 @@ document.getElementById("panelNuevoAdmin").classList.add("oculto");
 // Limpiar campos
 document.getElementById("correoAdmin").value = "";
 document.getElementById("cedulaAdmin").value = "";
-document.getElementById("passwordAdmin").value = "";
-document.getElementById("confirmPasswordAdmin").value = "";
+document.getElementById("password").value = "";
+document.getElementById("confirmPassword").value = "";
 
 // Recargar lista usuarios
 cargarUsuarios();
