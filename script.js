@@ -551,6 +551,11 @@ alert("Las contraseñas no coinciden");
 return;
 }
 
+if(password.length < 6){
+alert("Contraseña muy débil, debe contener al menos 6 caracteres");
+return;
+}
+
 try{
 
 const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
@@ -567,10 +572,7 @@ estado: "activo"
 });
 
 alert("Administrador creado correctamente");
-
-document.getElementById("panelNuevoAdmin").classList.add("oculto");
-
-cargarUsuarios();
+location.reload();
 
 }
 catch(error){
