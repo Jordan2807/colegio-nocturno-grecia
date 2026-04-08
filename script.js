@@ -523,3 +523,61 @@ alert("Correo no encontrado");
 }
 
 };
+
+/* Desplegar panel en pag*/
+document.getElementById("btnNuevoAdmin").addEventListener("click", () => {
+
+const panel = document.getElementById("panelNuevoAdmin");
+
+panel.classList.toggle("oculto");
+
+});
+
+/*Crear administrador*/
+window.registrarAdmin = async function(){
+
+const correo = document.getElementById("correoAdmin").value;
+const cedula = document.getElementById("cedulaAdmin").value;
+const password = document.getElementById("passwordAdmin").value;
+const confirmPassword = document.getElementById("confirmPasswordAdmin").value;
+
+if(!correo || !cedula || !password || !confirmPassword){
+alert("Todos los campos son obligatorios");
+return;
+}
+
+if(password !== confirmPassword){
+alert("Las contraseñas no coinciden");
+return;
+}
+
+try{
+
+const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
+
+const user = userCredential.user;
+
+await setDoc(doc(db,"usuarios",user.uid),{
+
+correo: correo,
+cedula: cedula,
+rol: "admin",
+estado: "activo",
+fecha: new Date()
+
+});
+
+alert("Administrador creado correctamente");
+
+document.getElementById("panelNuevoAdmin").classList.add("oculto");
+
+cargarUsuarios();
+
+}
+catch(error){
+
+alert("Error al crear administrador");
+
+}
+
+};

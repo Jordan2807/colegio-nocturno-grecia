@@ -21,6 +21,29 @@
         </nav>
     </header>
     <main>
+        <button id="btnNuevoAdmin" class="btn-nuevo-admin">
+        Registrar nuevo administrador
+        </button>
+
+        <div id="panelNuevoAdmin" class="panel-admin oculto">
+
+        <h2>Registrar Nuevo Administrador</h2>
+
+        <input type="email" id="correoAdmin" placeholder="Correo principal">
+
+        <input type="text" id="cedulaAdmin" placeholder="Cédula">
+
+        <input type="password" id="passwordAdmin" placeholder="Contraseña">
+        <i class="fa fa-eye togglePassword"></i>
+
+        <input type="password" id="confirmPasswordAdmin" placeholder="Confirmar contraseña">
+        <i class="fa fa-eye togglePassword"></i>
+
+        <button onclick="registrarAdmin()" class="btn-crear-admin">
+        Crear Administrador
+        </button>
+
+        </div>
 
         <h2 class="titulo-admin">Panel de Administrador</h2>
 
