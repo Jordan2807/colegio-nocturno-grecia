@@ -572,7 +572,18 @@ estado: "activo"
 });
 
 alert("Administrador creado correctamente");
-location.reload();
+
+// Ocultar panel
+document.getElementById("panelNuevoAdmin").classList.add("oculto");
+
+// Limpiar campos
+document.getElementById("correoAdmin").value = "";
+document.getElementById("cedulaAdmin").value = "";
+document.getElementById("passwordAdmin").value = "";
+document.getElementById("confirmPasswordAdmin").value = "";
+
+// Recargar lista usuarios
+cargarUsuarios();
 
 }
 catch(error){
