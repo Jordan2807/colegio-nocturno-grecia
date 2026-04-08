@@ -201,6 +201,21 @@ if(!querySnapshot.empty){
 const docExistente = querySnapshot.docs[0];
 const data = docExistente.data();
 
+// SI ESTA ELIMINADO → actualizar datos
+if(data.estado === "eliminado"){
+
+await updateDoc(doc(db,"usuarios",docExistente.id),{
+
+nombre: nombre,
+cedula: cedula,
+materia: materia,
+correo: correo,
+fecha: new Date()
+
+});
+
+}
+
 // enviar reset contraseña
 await sendPasswordResetEmail(auth, data.correo);
 
@@ -215,7 +230,6 @@ window.location.href = "aula.html";
 return;
 
 }
-
 // crear usuario nuevo
 const userCredential = await createUserWithEmailAndPassword(auth,correo,password);
 
