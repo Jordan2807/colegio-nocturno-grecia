@@ -379,7 +379,7 @@ footer {
     display: flex;
     justify-content: center;
     align-items: flex-start; 
-    min-height: calc(100vh - 120px); 
+    padding-top: 20px;
     padding-bottom: 20px;
 }
 
@@ -494,6 +494,11 @@ display: grid;
 grid-template-columns: repeat(4, 1fr);
 gap: 10px;
 margin-bottom: 20px;
+}
+
+.usuario-datos.admin{
+display:grid;
+grid-template-columns: repeat(3,1fr);
 }
 
 .dato{

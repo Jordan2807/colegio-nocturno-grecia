@@ -325,7 +325,7 @@ if(usuarioActual && usuarioActual.uid === docu.id) return;
 const tarjetaAdmin = `
 <div class="usuario-card">
 
-<div class="usuario-datos">
+<div class="usuario-datos admin">
 
 <div class="dato">
 <label>Cédula</label>
