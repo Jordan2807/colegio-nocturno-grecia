@@ -492,7 +492,7 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 
 .usuario-datos{
 display: grid;
-grid-template-columns: repeat(4, 1fr);
+grid-template-columns: repeat(5, 1fr);
 gap: 10px;
 margin-bottom: 20px;
 }

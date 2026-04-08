@@ -1,6 +1,8 @@
 /*FIREBASE CONFIGURACIÓN*/
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+initializeApp, getApps, getApp 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import { 
 getAuth, 
@@ -384,6 +386,11 @@ const tarjeta = `
 </div>
 
 <div class="dato">
+<label>Correo</label>
+<span>${data.correo}</span>
+</div>
+
+<div class="dato">
 <label>Materia</label>
 <span>${data.materia}</span>
 </div>
@@ -640,7 +647,17 @@ return;
 
 try{
 
-const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
+let secondaryApp;
+
+if (!getApps().some(app => app.name === "Secondary")) {
+secondaryApp = initializeApp(firebaseConfig, "Secondary");
+} else {
+secondaryApp = getApp("Secondary");
+}
+
+const secondaryAuth = getAuth(secondaryApp);
+
+const userCredential = await createUserWithEmailAndPassword(secondaryAuth, correo, password);
 
 const user = userCredential.user;
 
