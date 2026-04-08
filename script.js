@@ -328,7 +328,7 @@ const tarjetaAdmin = `
 <div class="usuario-datos admin">
 
 <div class="dato">
-<label>Cédula</label>
+<label>Nombre</label>
 <span>${data.cedula}</span>
 </div>
 
