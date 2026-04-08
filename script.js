@@ -538,8 +538,8 @@ window.registrarAdmin = async function(){
 
 const correo = document.getElementById("correoAdmin").value;
 const cedula = document.getElementById("cedulaAdmin").value;
-const password = document.getElementById("passwordAdmin").value;
-const confirmPassword = document.getElementById("confirmPasswordAdmin").value;
+const password = document.getElementById("password").value;
+const confirmPassword = document.getElementById("confirmPassword").value;
 
 if(!correo || !cedula || !password || !confirmPassword){
 alert("Todos los campos son obligatorios");
@@ -562,8 +562,7 @@ await setDoc(doc(db,"usuarios",user.uid),{
 correo: correo,
 cedula: cedula,
 rol: "admin",
-estado: "activo",
-fecha: new Date()
+estado: "activo"
 
 });
 
