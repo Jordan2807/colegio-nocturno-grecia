@@ -289,28 +289,85 @@ const querySnapshot = await getDocs(collection(db, "usuarios"));
 const contenedor = document.getElementById("usuarios");
 const solicitudes = document.getElementById("solicitudes");
 const tituloSolicitudes = document.getElementById("tituloSolicitudes");
+const contenedorAdmins = document.getElementById("admins");
+const tituloAdmins = document.getElementById("tituloAdmins");
 
 if(!contenedor) return;
 
 contenedor.innerHTML = "";
 solicitudes.innerHTML = "";
+contenedorAdmins.innerHTML = "";
 
 const inicioSesion = new Date(sessionStorage.getItem("inicioAdmin"));
+const usuarioActual = auth.currentUser;
 
 let haySolicitudes = false;
+let hayAdmins = false;
 
 querySnapshot.forEach((docu) => {
 
 const data = docu.data();
 
+/*no mostrar eliminados*/
 if(data.estado === "eliminado") return;
 
-// no mostrar admin
-if(!data.nombre) return;
-
 const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
-
 const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
+
+
+/*ADMINISTRADORES*/
+
+if(data.rol === "admin"){
+
+// no mostrar admin logeado
+if(usuarioActual && usuarioActual.uid === docu.id) return;
+
+const tarjetaAdmin = `
+<div class="usuario-card">
+
+<div class="usuario-datos">
+
+<div class="dato">
+<label>Cédula</label>
+<span>${data.cedula}</span>
+</div>
+
+<div class="dato">
+<label>Correo</label>
+<span>${data.correo}</span>
+</div>
+
+<div class="dato">
+<label>Estado</label>
+<span>${data.estado.charAt(0).toUpperCase() + data.estado.slice(1)}</span>
+</div>
+
+</div>
+
+<div class="usuario-botones">
+
+<button class="btn-admin btn-inactivar" onclick="inactivar('${docu.id}')">
+Inactivar
+</button>
+
+<button class="btn-admin btn-eliminar" onclick="eliminar('${docu.id}')">
+Eliminar
+</button>
+
+</div>
+
+</div>
+`;
+
+contenedorAdmins.innerHTML += tarjetaAdmin;
+hayAdmins = true;
+
+return;
+}
+
+/*PROFESORES*/
+
+if(!data.nombre) return;
 
 const tarjeta = `
 <div class="usuario-card">
@@ -367,9 +424,24 @@ contenedor.innerHTML += tarjeta;
 
 });
 
+
+/*Ocultar solicitudes si no hay*/
 if(!haySolicitudes){
 tituloSolicitudes.style.display = "none";
 solicitudes.style.display = "none";
+}else{
+tituloSolicitudes.style.display = "block";
+solicitudes.style.display = "block";
+}
+
+
+/*Ocultar admins si solo existe el logeado*/
+if(!hayAdmins){
+tituloAdmins.style.display = "none";
+contenedorAdmins.style.display = "none";
+}else{
+tituloAdmins.style.display = "block";
+contenedorAdmins.style.display = "block";
 }
 
 };
