@@ -109,7 +109,11 @@ html {
 
 /* CONTENIDO */
 main {
-     padding-top: 30px; 
+     padding-top: 120px; 
+}
+
+.home main{
+padding-top: 90px; 
 }
 
 /* RESPONSIVE – TELÉFONOS*/
