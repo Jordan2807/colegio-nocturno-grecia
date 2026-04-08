@@ -384,7 +384,7 @@ footer {
 }
 
 .login-container.admin {
-min-height: auto;
+min-height: 1;
 padding-top: 20px;
 }
 
