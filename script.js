@@ -291,6 +291,7 @@ const solicitudes = document.getElementById("solicitudes");
 const tituloSolicitudes = document.getElementById("tituloSolicitudes");
 const contenedorAdmins = document.getElementById("admins");
 const tituloAdmins = document.getElementById("tituloAdmins");
+const tituloUsuarios = document.getElementById("tituloUsuarios");
 
 if(!contenedor) return;
 
@@ -303,23 +304,22 @@ const usuarioActual = auth.currentUser;
 
 let haySolicitudes = false;
 let hayAdmins = false;
+let hayProfesores = false;
 
 querySnapshot.forEach((docu) => {
 
 const data = docu.data();
 
-/*no mostrar eliminados*/
+/*No mostrar eliminado*/
 if(data.estado === "eliminado") return;
 
 const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
 const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
 
-
-/*ADMINISTRADORES*/
-
+/*Administradores*/
 if(data.rol === "admin"){
 
-// no mostrar admin logeado
+/* no mostrar admin logeado*/
 if(usuarioActual && usuarioActual.uid === docu.id) return;
 
 const tarjetaAdmin = `
@@ -365,9 +365,8 @@ hayAdmins = true;
 return;
 }
 
-/*PROFESORES*/
-
-if(!data.nombre) return;
+/*Profesores*/
+if(data.rol === "profesor"){
 
 const tarjeta = `
 <div class="usuario-card">
@@ -420,12 +419,15 @@ solicitudes.innerHTML += tarjeta;
 haySolicitudes = true;
 }else{
 contenedor.innerHTML += tarjeta;
+hayProfesores = true;
+}
+
+return;
 }
 
 });
 
-
-/*Ocultar solicitudes si no hay*/
+/* Ocultar solicitudes si no hay */
 if(!haySolicitudes){
 tituloSolicitudes.style.display = "none";
 solicitudes.style.display = "none";
@@ -434,14 +436,22 @@ tituloSolicitudes.style.display = "block";
 solicitudes.style.display = "block";
 }
 
-
-/*Ocultar admins si solo existe el logeado*/
+/* Ocultar admins si no hay */
 if(!hayAdmins){
 tituloAdmins.style.display = "none";
 contenedorAdmins.style.display = "none";
 }else{
 tituloAdmins.style.display = "block";
 contenedorAdmins.style.display = "block";
+}
+
+/* Ocultar profesores si no hay */
+if(!hayProfesores){
+tituloUsuarios.style.display = "none";
+contenedor.style.display = "none";
+}else{
+tituloUsuarios.style.display = "block";
+contenedor.style.display = "block";
 }
 
 };
