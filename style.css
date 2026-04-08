@@ -379,8 +379,13 @@ footer {
     display: flex;
     justify-content: center;
     align-items: flex-start; 
-    padding-top: 20px;
+    min-height: calc(100vh - 120px); 
     padding-bottom: 20px;
+}
+
+.login-container.admin {
+min-height: auto;
+padding-top: 20px;
 }
 
 /* CAJA LOGIN */
