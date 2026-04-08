@@ -576,35 +576,6 @@ display: block;
 border-radius: 8px;
 }
 
-.panel-admin{
-background: white;
-padding: 30px;
-max-width: 600px;
-margin: auto;
-border-radius: 10px;
-box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-
-.panel-admin h2{
-text-align: center;
-margin-bottom: 20px;
-}
-
-.panel-admin input{
-width: 100%;
-padding: 12px;
-margin-bottom: 15px;
-}
-
-.btn-crear-admin{
-background: #0033A0;
-color: white;
-padding: 12px;
-width: 100%;
-border: none;
-cursor: pointer;
-}
-
 .oculto{
 display: none;
 }
