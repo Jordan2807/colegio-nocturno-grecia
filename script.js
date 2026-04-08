@@ -575,7 +575,25 @@ cargarUsuarios();
 }
 catch(error){
 
-alert("Error al crear administrador");
+let mensaje = "Error al registrar";
+
+switch(error.code){
+
+case "auth/weak-password":
+mensaje = "Contraseña muy débil";
+break;
+
+case "auth/email-already-in-use":
+mensaje = "Este usuario ya está registrado";
+break;
+
+default:
+mensaje = "Ocurrió un error";
+break;
+
+}
+
+alert(mensaje);
 
 }
 
