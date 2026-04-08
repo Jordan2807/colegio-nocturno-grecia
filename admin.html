@@ -33,11 +33,15 @@
 
         <input type="text" id="cedulaAdmin" placeholder="Cédula">
 
-        <input type="password" id="passwordAdmin" placeholder="Contraseña">
-        <i class="fa fa-eye togglePassword"></i>
+        <div class="password-container">
+        <input type="password" id="password" placeholder="Contraseña">
+        <i class="fa-solid fa-eye togglePassword"></i>
+        </div>
 
-        <input type="password" id="confirmPasswordAdmin" placeholder="Confirmar contraseña">
-        <i class="fa fa-eye togglePassword"></i>
+        <div class="password-container">
+        <input type="password" id="confirmPassword" placeholder="Confirmar contraseña">
+        <i class="fa-solid fa-eye togglePassword"></i>
+        </div>
 
         <button onclick="registrarAdmin()" class="btn-crear-admin">
         Crear Administrador
