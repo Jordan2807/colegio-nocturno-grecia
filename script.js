@@ -716,7 +716,12 @@ alert(mensaje);
 
 /* Mostrar Ventanas - Profesores*/
 
+const btnMenu = document.getElementById("btnMenu");
 const sidebar = document.getElementById("sidebar");
+
+btnMenu.addEventListener("click", function(){
+sidebar.classList.toggle("active");
+});
 
 btnMenu.onclick = () => {
 sidebar.classList.toggle("active");

@@ -602,9 +602,9 @@ display: none;
 .sidebar{
 position:fixed;
 left:-250px;
-top:0;
+top:80px;
 width:250px;
-height:100%;
+height:calc(100% - 80px);
 background:#1e3a8a;
 color:white;
 padding:20px;
@@ -621,6 +621,7 @@ position:fixed;
 top:20px;
 left:20px;
 font-size:20px;
+z-index: 1100;
 }
 
 .contenido{
