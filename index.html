@@ -157,6 +157,10 @@
     <footer>
         <p>© 2026 Colegio Nocturno de Grecia - Todos los derechos reservados</p>
     </footer>
-<script type="module" src="script.js"></script> 
+<script type="module" src="js/common.js"></script>
+<script type="module">
+  import { initHeroSlider } from './js/common.js';
+  window.addEventListener('load', initHeroSlider);
+</script>
 </body>
 </html>
