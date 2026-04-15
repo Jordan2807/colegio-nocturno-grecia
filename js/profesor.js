@@ -6,7 +6,7 @@ import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
-  ref, uploadBytes, getDownloadURL
+  ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -186,47 +186,105 @@ window.abrirSeccion = function(id, nombre) {
 
 //----------ELIMINAR SECCION-----
 async function eliminarSeccion(id, nombre) {
-  if (!confirm(`¿Eliminar la sección "${nombre}"?\nEsta acción no se puede deshacer, y se eliminarán todos los archivos adjuntos.`)) {
+  if (!confirm(`¿Eliminar la sección "${nombre}"?\n\nSe borrarán también todos los archivos contenidos en ella. Esta acción no se puede deshacer.`)) {
     return;
   }
   
   try {
+    // 1. Obtener todos los archivos de esta sección
+    const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
+    const archivosSnapshot = await getDocs(archivosQuery);
+    
+    // 2. Eliminar cada archivo de Storage y Firestore
+    const deletePromises = [];
+    archivosSnapshot.forEach((archivoDoc) => {
+      const archivoData = archivoDoc.data();
+      
+      // Eliminar documento en Firestore
+      deletePromises.push(deleteDoc(doc(db, "archivos", archivoDoc.id)));
+      
+      // Eliminar objeto en Storage
+      // Construimos la referencia basada en la URL o reconstruyendo la ruta
+      // Opción recomendada: usar la misma estructura que al subir
+      const storageRef = ref(storage, `secciones/${id}/${archivoData.nombre}`);
+      deletePromises.push(deleteObject(storageRef).catch(err => {
+        // Si el archivo no existe en Storage, ignoramos el error
+        if (err.code !== 'storage/object-not-found') {
+          console.warn("No se pudo eliminar archivo de Storage:", archivoData.nombre, err);
+        }
+      }));
+    });
+    
+    // Esperar a que se eliminen todos los archivos
+    await Promise.all(deletePromises);
+    
+    // 3. Eliminar la sección
     await deleteDoc(doc(db, "secciones", id));
     
-    // Opcional: eliminar archivos asociados (si quieres)
-    // const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
-    // const archivosSnapshot = await getDocs(archivosQuery);
-    // archivosSnapshot.forEach(async (archivoDoc) => {
-    //   await deleteDoc(doc(db, "archivos", archivoDoc.id));
-    // });
+    alert("Sección y sus archivos eliminados correctamente");
     
-    alert("Sección eliminada correctamente");
-    await cargarSecciones(); // Refrescar la lista
+    // 4. Refrescar la lista de secciones
+    await cargarSecciones();
+    
+    // 5. Si estábamos dentro de la sección eliminada, volver a la lista de secciones
+    const archivosDiv = document.getElementById("archivos");
+    const seccionesDiv = document.getElementById("secciones");
+    if (archivosDiv && !archivosDiv.classList.contains("oculto") && seccionActualId === id) {
+      archivosDiv.classList.add("oculto");
+      seccionesDiv?.classList.remove("oculto");
+      seccionActualId = null;
+    }
+    
   } catch (error) {
     console.error("Error al eliminar sección:", error);
-    alert("No se pudo eliminar la sección. Intenta de nuevo.");
+    alert("Error al eliminar. Intenta de nuevo.");
   }
 }
 
 // ---------- ARCHIVOS ----------
 window.subirArchivo = async function() {
-  const fileInput = document.getElementById("archivo");
-  const file = fileInput?.files[0];
-  if (!file) return alert("Seleccione un archivo");
-  if (!seccionActualId) return alert("No hay sección seleccionada");
+  const archivoInput = document.getElementById("archivo");
+  const file = archivoInput?.files[0];
+  
+  if (!file) {
+    alert("Seleccione un archivo");
+    return;
+  }
+  
+  if (!seccionActualId) {
+    alert("No hay sección seleccionada");
+    return;
+  }
 
-  const storageRef = ref(storage, `archivos/${file.name}`);
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
-
-  await addDoc(collection(db, "archivos"), {
-    nombre: file.name,
-    url,
-    seccion: seccionActualId
-  });
-
-  fileInput.value = "";
-  await cargarArchivos();
+  try {
+    // Crear referencia en Storage (usar una carpeta por sección para organización)
+    const storageRef = ref(storage, `secciones/${seccionActualId}/${file.name}`);
+    
+    // Subir archivo
+    await uploadBytes(storageRef, file);
+    
+    // Obtener URL pública
+    const url = await getDownloadURL(storageRef);
+    
+    // Guardar metadatos en Firestore
+    await addDoc(collection(db, "archivos"), {
+      nombre: file.name,
+      url: url,
+      seccion: seccionActualId,
+      fecha: new Date()
+    });
+    
+    // Limpiar input
+    archivoInput.value = "";
+    
+    // Recargar lista de archivos
+    await cargarArchivos();
+    
+    alert("Archivo subido correctamente");
+  } catch (error) {
+    console.error("Error al subir archivo:", error);
+    alert("Error al subir el archivo: " + error.message);
+  }
 };
 
 async function cargarArchivos() {
