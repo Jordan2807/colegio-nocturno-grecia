@@ -186,7 +186,7 @@ window.abrirSeccion = function(id, nombre) {
 
 //----------ELIMINAR SECCION-----
 async function eliminarSeccion(id, nombre) {
-  if (!confirm(`¿Eliminar la sección "${nombre}"?\nEsta acción no se puede deshacer.`)) {
+  if (!confirm(`¿Eliminar la sección "${nombre}"?\nEsta acción no se puede deshacer, y se eliminarán todos los archivos adjuntos.`)) {
     return;
   }
   
