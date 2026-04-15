@@ -243,105 +243,94 @@ async function eliminarSeccion(id, nombre) {
 
 // ---------- ARCHIVOS ----------
 window.subirArchivo = async function() {
-  const archivoInput = document.getElementById("archivo");
-  const file = archivoInput?.files[0];
-  
-  if (!file) {
-    alert("Seleccione un archivo");
-    return;
-  }
-  
-  if (!seccionActualId) {
-    alert("No hay sección seleccionada");
-    return;
-  }
+    const archivoInput = document.getElementById("archivo");
+    const file = archivoInput?.files[0];
 
-  try {
-    // Crear referencia en Storage (usar una carpeta por sección para organización)
-    const storageRef = ref(storage, `secciones/${seccionActualId}/${file.name}`);
-    
-    // Subir archivo
-    await uploadBytes(storageRef, file);
-    
-    // Obtener URL pública
-    const url = await getDownloadURL(storageRef);
-    
-    // Guardar metadatos en Firestore
-    await addDoc(collection(db, "archivos"), {
-      nombre: file.name,
-      url: url,
-      seccion: seccionActualId,
-      fecha: new Date()
+    if (!file) return alert("Seleccione un archivo");
+    if (!seccionActualId) return alert("No hay sección seleccionada");
+
+    const widget = window.cloudinary.createUploadWidget({
+        cloudName: 'TU_CLOUD_NAME',        // <-- ¡REEMPLAZA CON TU CLOUD NAME!
+        uploadPreset: 'preset_profesores', // <-- El nombre de tu upload preset
+        sources: [ 'local', 'url' ],
+        folder: `secciones/${seccionActualId}`,
+        clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
+        maxFileSize: 15000000, // 15 MB
+    }, async (error, result) => {
+        if (error) {
+            console.error("Error en la subida a Cloudinary:", error);
+            alert("Error al subir el archivo.");
+            return;
+        }
+        
+        if (result && result.event === "success") {
+            console.log("Subida exitosa:", result.info);
+            await guardarArchivoEnFirestore(file.name, result.info.secure_url, result.info.public_id);
+        }
     });
-    
-    // Limpiar input
-    archivoInput.value = "";
-    
-    // Recargar lista de archivos
-    await cargarArchivos();
-    
-    alert("Archivo subido correctamente");
-  } catch (error) {
-    console.error("Error al subir archivo:", error);
-    alert("Error al subir el archivo: " + error.message);
-  }
+
+    widget.open();
 };
 
+// NUEVA FUNCIÓN AUXILIAR
+async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
+    try {
+        await addDoc(collection(db, "archivos"), {
+            nombre: nombreArchivo,
+            url: urlArchivo,
+            seccion: seccionActualId,
+            fecha: new Date(),
+            publicId: publicId      // <-- Indispensable para eliminar después
+        });
+        await cargarArchivos();
+        alert("Archivo subido correctamente");
+    } catch (error) {
+        console.error("Error al guardar en Firestore:", error);
+        alert("El archivo se subió, pero hubo un error al guardarlo en la base de datos.");
+    }
+}
+
 async function cargarArchivos() {
-  const lista = document.getElementById("listaArchivos");
-  if (!lista || !seccionActualId) return;
+    const lista = document.getElementById("listaArchivos");
+    if (!lista || !seccionActualId) return;
 
-  const q = query(collection(db, "archivos"), where("seccion", "==", seccionActualId));
-  const snapshot = await getDocs(q);
+    const q = query(collection(db, "archivos"), where("seccion", "==", seccionActualId));
+    const snapshot = await getDocs(q);
 
-  lista.innerHTML = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "archivo-item";
-    div.innerHTML = `
-      <a href="${data.url}" target="_blank">${data.nombre}</a>
-      <button class="btn-eliminar-archivo" data-id="${doc.id}" data-nombre="${data.nombre}" title="Eliminar archivo">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    `;
-    
-    // Evento para eliminar archivo
-    div.querySelector('.btn-eliminar-archivo').addEventListener('click', (e) => {
-      e.preventDefault();
-      eliminarArchivo(doc.id, data.nombre);
+    lista.innerHTML = "";
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "archivo-item";
+        div.innerHTML = `
+          <a href="${data.url}" target="_blank">${data.nombre}</a>
+          <button class="btn-eliminar-archivo" data-id="${doc.id}" data-public-id="${data.publicId}" title="Eliminar archivo">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+        
+        div.querySelector('.btn-eliminar-archivo').addEventListener('click', (e) => {
+          e.preventDefault();
+          const publicId = e.currentTarget.dataset.publicId;
+          eliminarArchivo(doc.id, data.nombre, publicId);
+        });
+        
+        lista.appendChild(div);
     });
-    
-    lista.appendChild(div);
-  });
 }
 
 //Eliminar archivos
-async function eliminarArchivo(id, nombre) {
-  if (!confirm(`¿Eliminar el archivo "${nombre}"?`)) return;
-  
+async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
+  if (!confirm(`¿Eliminar el archivo "${nombreArchivo}" de la lista?\n\nNota: Por ahora solo se borra el registro. La eliminación definitiva se configurará en el siguiente paso.`)) return;
+
   try {
-    // Obtener datos del archivo para saber su ruta en Storage
-    const archivoRef = doc(db, "archivos", id);
-    const archivoSnap = await getDoc(archivoRef);
-    if (!archivoSnap.exists()) throw new Error("Archivo no encontrado");
-    
-    const data = archivoSnap.data();
-    
-    // Eliminar de Firestore
-    await deleteDoc(archivoRef);
-    
-    // Eliminar de Storage (reconstruir ruta)
-    const storageRef = ref(storage, `secciones/${data.seccion}/${data.nombre}`);
-    await deleteObject(storageRef).catch(err => {
-      if (err.code !== 'storage/object-not-found') console.warn("No se pudo eliminar de Storage:", err);
-    });
-    
-    alert("Archivo eliminado");
-    await cargarArchivos(); // Refrescar lista
+    // Elimina el documento de Firestore
+    await deleteDoc(doc(db, "archivos", idFirestore));
+    alert("Registro eliminado. El archivo permanece en Cloudinary temporalmente.");
+    await cargarArchivos();
   } catch (error) {
     console.error("Error al eliminar archivo:", error);
-    alert("No se pudo eliminar el archivo.");
+    alert("No se pudo eliminar el registro.");
   }
 }
 
