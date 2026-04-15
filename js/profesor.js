@@ -242,30 +242,33 @@ async function eliminarSeccion(id, nombre) {
 }
 
 // ---------- ARCHIVOS ----------
-window.subirArchivo = async function() {
-    const archivoInput = document.getElementById("archivo");
-    const file = archivoInput?.files[0];
-
-    if (!file) return alert("Seleccione un archivo");
-    if (!seccionActualId) return alert("No hay sección seleccionada");
+window.seleccionarYSubirArchivo = function() {
+    if (!seccionActualId) {
+        alert("No hay sección seleccionada");
+        return;
+    }
 
     const widget = window.cloudinary.createUploadWidget({
-        cloudName: 'TU_CLOUD_NAME',        // <-- ¡REEMPLAZA CON TU CLOUD NAME!
-        uploadPreset: 'preset_profesores', // <-- El nombre de tu upload preset
-        sources: [ 'local', 'url' ],
+        cloudName: 'TU_CLOUD_NAME',        // <-- Reemplaza con tu Cloud Name real
+        uploadPreset: 'preset_profesores', // <-- Reemplaza con tu Upload Preset real
+        sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        maxFileSize: 15000000, // 15 MB
+        maxFileSize: 15000000,
     }, async (error, result) => {
         if (error) {
-            console.error("Error en la subida a Cloudinary:", error);
+            console.error("Error en la subida:", error);
             alert("Error al subir el archivo.");
             return;
         }
         
         if (result && result.event === "success") {
             console.log("Subida exitosa:", result.info);
-            await guardarArchivoEnFirestore(file.name, result.info.secure_url, result.info.public_id);
+            await guardarArchivoEnFirestore(
+                result.info.original_filename, 
+                result.info.secure_url, 
+                result.info.public_id
+            );
         }
     });
 
