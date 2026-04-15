@@ -55,24 +55,72 @@ window.mostrarSecciones = function() {
   document.getElementById("archivos")?.classList.add("oculto");
 };
 
-// ---------- PERFIL ----------
+// ---------- PERFIL (con confirmación de contraseña) ----------
 window.guardarPerfil = async function() {
-  const nombre = document.getElementById("nombre")?.value;
-  const cedula = document.getElementById("cedula")?.value;
-  const materia = document.getElementById("materia")?.value;
-  const password = document.getElementById("password")?.value;
+  const nombreInput = document.getElementById("nombre");
+  const cedulaInput = document.getElementById("cedula");
+  const materiaInput = document.getElementById("materia");
+  const passwordInput = document.getElementById("password");
+  const confirmInput = document.getElementById("confirmPassword");
 
-  if (!currentUser) return;
-
-  await updateDoc(doc(db, "usuarios", currentUser.uid), {
-    nombre, cedula, materia
-  });
-
-  if (password) {
-    await updatePassword(currentUser, password);
+  if (!currentUser) {
+    alert("No hay sesión activa");
+    return;
   }
 
-  alert("Perfil actualizado");
+  const nombre = nombreInput?.value.trim();
+  const cedula = cedulaInput?.value.trim();
+  const materia = materiaInput?.value.trim();
+  const password = passwordInput?.value;
+  const confirm = confirmInput?.value;
+
+  // Validar campos obligatorios
+  if (!nombre || !cedula || !materia) {
+    alert("Nombre, cédula y materia son obligatorios");
+    return;
+  }
+
+  // Si se intenta cambiar la contraseña
+  if (password || confirm) {
+    if (password !== confirm) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+    if (password.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+  }
+
+  try {
+    // Actualizar datos en Firestore
+    await updateDoc(doc(db, "usuarios", currentUser.uid), {
+      nombre,
+      cedula,
+      materia
+    });
+
+    // Actualizar contraseña en Auth si se proporcionó
+    if (password) {
+      await updatePassword(currentUser, password);
+    }
+
+    alert("Perfil actualizado correctamente");
+
+    // Limpiar campos de contraseña por seguridad
+    if (passwordInput) passwordInput.value = "";
+    if (confirmInput) confirmInput.value = "";
+
+  } catch (error) {
+    console.error("Error al guardar perfil:", error);
+    let mensaje = "Error al guardar los cambios";
+    if (error.code === "auth/requires-recent-login") {
+      mensaje = "Por seguridad, vuelve a iniciar sesión para cambiar la contraseña";
+    } else if (error.message) {
+      mensaje = error.message;
+    }
+    alert(mensaje);
+  }
 };
 
 // ---------- SECCIONES ----------
