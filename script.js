@@ -20,6 +20,7 @@ doc,
 setDoc, 
 getDoc, 
 deleteDoc, 
+addDoc,
 collection, 
 getDocs, 
 updateDoc, 
@@ -716,15 +717,15 @@ alert(mensaje);
 
 /* Mostrar Ventanas - Profesores*/
 
-const btnMenu = document.getElementById("btnMenu");
+const perfil = document.getElementById("perfil");
+const secciones = document.getElementById("secciones");
+const archivos = document.getElementById("archivos");
+
+window.toggleMenu = function(){
+
 const sidebar = document.getElementById("sidebar");
-
-btnMenu.addEventListener("click", function(){
 sidebar.classList.toggle("active");
-});
 
-btnMenu.onclick = () => {
-sidebar.classList.toggle("active");
 };
 
 window.mostrarPerfil = function(){
@@ -760,7 +761,33 @@ alert("Perfil actualizado");
 
 };
 
-/* Crear secciones - Profesor*/
+/* Crear seccion - Profesor*/
+
+window.crearSeccion = async function(){
+
+const user = auth.currentUser;
+const nombreSeccion = document.getElementById("nombreSeccion").value;
+
+if(!nombreSeccion){
+alert("Ingrese el nombre de la sección");
+return;
+}
+
+await addDoc(collection(db,"secciones"),{
+
+nombre: nombreSeccion,
+profesor: user.uid,
+fecha: new Date()
+
+});
+
+document.getElementById("nombreSeccion").value = "";
+
+cargarSecciones();
+
+};
+
+/* Cargar secciones - Profesor*/
 
 window.cargarSecciones = async function(){
 
