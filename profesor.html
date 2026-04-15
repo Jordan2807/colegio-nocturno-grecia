@@ -34,8 +34,8 @@
 
     <h2>Profesor</h2>
 
-    <button onclick="mostrarPerfil()">Editar Perfil</button>
-    <button onclick="mostrarSecciones()">Secciones</button>
+    <button onclick="mostrarPerfil()" class="btn-aula">Editar Perfil</button>
+    <button onclick="mostrarSecciones()" class="btn-aula">Secciones</button>
 
     </div>
 
@@ -43,7 +43,8 @@
     <div class="contenido">
 
     <!-- PERFIL -->
-    <div id="perfil" class="seccion oculto">
+    <div id="perfil" class="login-container oculto">
+    <div class="login-box">
 
     <h2>Editar Perfil</h2>
 
@@ -51,9 +52,17 @@
     <input type="text" id="cedula" placeholder="Cédula">
     <input type="text" id="materia" placeholder="Materia">
 
-    <input type="password" id="password" placeholder="Nueva contraseña">
+    <div class="password-container">
+        <input type="password" id="password" placeholder="Nueva contraseña">
+        <i class="fa-solid fa-eye togglePassword"></i>
+        </div>
 
-    <button onclick="guardarPerfil()">Guardar</button>
+        <div class="password-container">
+        <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+        <i class="fa-solid fa-eye togglePassword"></i>
+        </div>
+
+    <button onclick="guardarPerfil()" class="btn-login">Guardar</button>
 
     </div>
 
@@ -82,12 +91,12 @@
     <h2 id="tituloSeccion"></h2>
 
     <input type="file" id="archivo">
-    <button onclick="subirArchivo()">Subir</button>
+    <button onclick="subirArchivo()" class="btn-login">Subir</button>
 
     <div id="listaArchivos"></div>
 
     </div>
-
+    </div>
     </div>
 
 
