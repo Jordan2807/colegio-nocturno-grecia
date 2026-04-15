@@ -716,3 +716,35 @@ font-size:16px;
   background-color: #f8d7da;
   color: #b02a37;
 }
+
+.archivo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.archivo-item a {
+  color: #002b5c;
+  text-decoration: none;
+  flex: 1;
+}
+
+.archivo-item a:hover {
+  text-decoration: underline;
+}
+
+.btn-eliminar-archivo {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-eliminar-archivo:hover {
+  background-color: #f8d7da;
+}

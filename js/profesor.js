@@ -3,7 +3,7 @@ import { auth, db, storage } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
-  doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc
+  doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   ref, uploadBytes, getDownloadURL, deleteObject
@@ -298,10 +298,53 @@ async function cargarArchivos() {
   snapshot.forEach(doc => {
     const data = doc.data();
     const div = document.createElement("div");
-    div.innerHTML = `<a href="${data.url}" target="_blank">${data.nombre}</a>`;
+    div.className = "archivo-item";
+    div.innerHTML = `
+      <a href="${data.url}" target="_blank">${data.nombre}</a>
+      <button class="btn-eliminar-archivo" data-id="${doc.id}" data-nombre="${data.nombre}" title="Eliminar archivo">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    
+    // Evento para eliminar archivo
+    div.querySelector('.btn-eliminar-archivo').addEventListener('click', (e) => {
+      e.preventDefault();
+      eliminarArchivo(doc.id, data.nombre);
+    });
+    
     lista.appendChild(div);
   });
 }
+
+//Eliminar archivos
+async function eliminarArchivo(id, nombre) {
+  if (!confirm(`¿Eliminar el archivo "${nombre}"?`)) return;
+  
+  try {
+    // Obtener datos del archivo para saber su ruta en Storage
+    const archivoRef = doc(db, "archivos", id);
+    const archivoSnap = await getDoc(archivoRef);
+    if (!archivoSnap.exists()) throw new Error("Archivo no encontrado");
+    
+    const data = archivoSnap.data();
+    
+    // Eliminar de Firestore
+    await deleteDoc(archivoRef);
+    
+    // Eliminar de Storage (reconstruir ruta)
+    const storageRef = ref(storage, `secciones/${data.seccion}/${data.nombre}`);
+    await deleteObject(storageRef).catch(err => {
+      if (err.code !== 'storage/object-not-found') console.warn("No se pudo eliminar de Storage:", err);
+    });
+    
+    alert("Archivo eliminado");
+    await cargarArchivos(); // Refrescar lista
+  } catch (error) {
+    console.error("Error al eliminar archivo:", error);
+    alert("No se pudo eliminar el archivo.");
+  }
+}
+
 window.cargarArchivos = cargarArchivos;
 
 window.addEventListener('DOMContentLoaded', init);
