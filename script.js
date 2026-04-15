@@ -573,7 +573,8 @@ const nombre = document.getElementById("nombreProfesor");
 if(nombre){
 nombre.innerText = data.nombre;
 }
-
+mostrarSecciones();
+cargarSecciones();
 }
 
 });
@@ -744,6 +745,10 @@ archivos.classList.add("oculto");
 
 window.guardarPerfil = async function(){
 
+const nombre = document.getElementById("nombre");
+const cedula = document.getElementById("cedula");
+const materia = document.getElementById("materia");
+const password = document.getElementById("password")
 const user = auth.currentUser;
 
 await updateDoc(doc(db,"usuarios",user.uid),{
@@ -792,6 +797,7 @@ cargarSecciones();
 window.cargarSecciones = async function(){
 
 const user = auth.currentUser;
+const listaSecciones = document.getElementById("listaSecciones");
 
 const q = query(
 collection(db,"secciones"),
@@ -823,6 +829,8 @@ ${data.nombre}
 /* Abrir seccion -Profesor*/
 window.abrirSeccion = function(id,nombre){
 
+const tituloSeccion = document.getElementById("tituloSeccion"); 
+    
 secciones.classList.add("oculto");
 archivos.classList.remove("oculto");
 
@@ -838,7 +846,13 @@ cargarArchivos();
 /* Subir archivo - Profesor*/
 window.subirArchivo = async function(){
 
+const archivo = document.getElementById("archivo");    
 const file = archivo.files[0];
+
+if(!file){
+alert("Seleccione un archivo");
+return;
+}
 
 const seccion = sessionStorage.getItem("seccionActual");
 
@@ -863,6 +877,7 @@ cargarArchivos();
 /* Cargar archivo - Profesor*/
 window.cargarArchivos = async function(){
 
+const listaArchivos = document.getElementById("listaArchivos");    
 const seccion = sessionStorage.getItem("seccionActual");
 
 const q = query(
