@@ -1,14 +1,12 @@
 // js/profesor.js
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
 import { auth, db, storage } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import {
-  ref, uploadBytes, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 
 let currentUser = null;
 let seccionActualId = null;
@@ -186,61 +184,43 @@ window.abrirSeccion = function(id, nombre) {
 
 //----------ELIMINAR SECCION-----
 async function eliminarSeccion(id, nombre) {
-  if (!confirm(`¿Eliminar la sección "${nombre}"?\n\nSe borrarán también todos los archivos contenidos en ella. Esta acción no se puede deshacer.`)) {
-    return;
-  }
-  
+  if (!confirm(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`)) return;
+
+  const functions = getFunctions();
+  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
+
   try {
-    // 1. Obtener todos los archivos de esta sección
+    // Obtener todos los archivos de esta sección
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
     
-    // 2. Eliminar cada archivo de Storage y Firestore
+    // Eliminar cada archivo de Cloudinary y Firestore en paralelo
     const deletePromises = [];
     archivosSnapshot.forEach((archivoDoc) => {
       const archivoData = archivoDoc.data();
-      
-      // Eliminar documento en Firestore
+      deletePromises.push(eliminarDeCloudinary({ publicId: archivoData.publicId }));
       deletePromises.push(deleteDoc(doc(db, "archivos", archivoDoc.id)));
-      
-      // Eliminar objeto en Storage
-      // Construimos la referencia basada en la URL o reconstruyendo la ruta
-      // Opción recomendada: usar la misma estructura que al subir
-      const storageRef = ref(storage, `secciones/${id}/${archivoData.nombre}`);
-      deletePromises.push(deleteObject(storageRef).catch(err => {
-        // Si el archivo no existe en Storage, ignoramos el error
-        if (err.code !== 'storage/object-not-found') {
-          console.warn("No se pudo eliminar archivo de Storage:", archivoData.nombre, err);
-        }
-      }));
     });
     
-    // Esperar a que se eliminen todos los archivos
     await Promise.all(deletePromises);
     
-    // 3. Eliminar la sección
+    // Finalmente eliminar la sección
     await deleteDoc(doc(db, "secciones", id));
     
-    alert("Sección y sus archivos eliminados correctamente");
-    
-    // 4. Refrescar la lista de secciones
+    alert("Sección y archivos eliminados correctamente");
     await cargarSecciones();
     
-    // 5. Si estábamos dentro de la sección eliminada, volver a la lista de secciones
-    const archivosDiv = document.getElementById("archivos");
-    const seccionesDiv = document.getElementById("secciones");
-    if (archivosDiv && !archivosDiv.classList.contains("oculto") && seccionActualId === id) {
-      archivosDiv.classList.add("oculto");
-      seccionesDiv?.classList.remove("oculto");
+    // Ocultar vista de archivos si estábamos dentro de la sección eliminada
+    if (seccionActualId === id) {
+      document.getElementById("archivos")?.classList.add("oculto");
+      document.getElementById("secciones")?.classList.remove("oculto");
       seccionActualId = null;
     }
-    
   } catch (error) {
     console.error("Error al eliminar sección:", error);
-    alert("Error al eliminar. Intenta de nuevo.");
+    alert("Error al eliminar la sección. Intenta de nuevo.");
   }
 }
-
 // ---------- ARCHIVOS ----------
 window.seleccionarYSubirArchivo = function() {
     if (!seccionActualId) {
@@ -324,16 +304,23 @@ async function cargarArchivos() {
 
 //Eliminar archivos
 async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
-  if (!confirm(`¿Eliminar el archivo "${nombreArchivo}" de la lista?\n\nNota: Por ahora solo se borra el registro. La eliminación definitiva se configurará en el siguiente paso.`)) return;
+  if (!confirm(`¿Eliminar el archivo "${nombreArchivo}"?`)) return;
+
+  const functions = getFunctions();
+  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
 
   try {
-    // Elimina el documento de Firestore
+    // 1. Eliminar de Cloudinary (llamada a la Cloud Function)
+    await eliminarDeCloudinary({ publicId: publicId });
+    
+    // 2. Eliminar el documento de Firestore
     await deleteDoc(doc(db, "archivos", idFirestore));
-    alert("Registro eliminado. El archivo permanece en Cloudinary temporalmente.");
+    
+    alert("Archivo eliminado correctamente");
     await cargarArchivos();
   } catch (error) {
     console.error("Error al eliminar archivo:", error);
-    alert("No se pudo eliminar el registro.");
+    alert("No se pudo eliminar el archivo. Intenta de nuevo.");
   }
 }
 
