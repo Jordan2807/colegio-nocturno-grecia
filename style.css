@@ -629,7 +629,7 @@ font-size:15px;
 }
 
 .sidebar button:hover{
-background:#1d4ed8;
+background:#e6c200;
 }
 
 .btn-menu{
@@ -677,4 +677,42 @@ margin:10px 0;
 border-radius:8px;
 border:1px solid #ccc;
 font-size:16px;
+}
+
+/* Tarjeta de sección con flex */
+.tarjeta-seccion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: default;
+}
+
+.nombre-seccion {
+  flex: 1;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nombre-seccion:hover {
+  color: #002b5c;
+  text-decoration: underline;
+}
+
+/* Botón eliminar (icono de basura rojo) */
+.btn-eliminar-seccion {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-eliminar-seccion:hover {
+  background-color: #f8d7da;
+  color: #b02a37;
 }

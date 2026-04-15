@@ -3,7 +3,7 @@ import { auth, db, storage } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
-  doc, updateDoc, addDoc, collection, query, where, getDocs
+  doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   ref, uploadBytes, getDownloadURL
@@ -138,6 +138,7 @@ window.crearSeccion = async function() {
   await cargarSecciones();
 };
 
+
 async function cargarSecciones() {
   const lista = document.getElementById("listaSecciones");
   if (!lista) return;
@@ -148,13 +149,30 @@ async function cargarSecciones() {
   lista.innerHTML = "";
   snapshot.forEach(doc => {
     const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "tarjeta";
-    div.textContent = data.nombre;
-    div.addEventListener("click", () => abrirSeccion(doc.id, data.nombre));
-    lista.appendChild(div);
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta tarjeta-seccion";
+    tarjeta.innerHTML = `
+      <span class="nombre-seccion">${data.nombre}</span>
+      <button class="btn-eliminar-seccion" data-id="${doc.id}" title="Eliminar sección">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    
+    // Click en el nombre abre la sección
+    tarjeta.querySelector('.nombre-seccion').addEventListener('click', () => {
+      abrirSeccion(doc.id, data.nombre);
+    });
+    
+    // Click en el botón elimina (detiene propagación)
+    tarjeta.querySelector('.btn-eliminar-seccion').addEventListener('click', (e) => {
+      e.stopPropagation();
+      eliminarSeccion(doc.id, data.nombre);
+    });
+    
+    lista.appendChild(tarjeta);
   });
 }
+
 window.cargarSecciones = cargarSecciones;
 
 window.abrirSeccion = function(id, nombre) {
@@ -165,6 +183,30 @@ window.abrirSeccion = function(id, nombre) {
   if (titulo) titulo.innerText = nombre;
   cargarArchivos();
 };
+
+//----------ELIMINAR SECCION-----
+async function eliminarSeccion(id, nombre) {
+  if (!confirm(`¿Eliminar la sección "${nombre}"?\nEsta acción no se puede deshacer.`)) {
+    return;
+  }
+  
+  try {
+    await deleteDoc(doc(db, "secciones", id));
+    
+    // Opcional: eliminar archivos asociados (si quieres)
+    // const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
+    // const archivosSnapshot = await getDocs(archivosQuery);
+    // archivosSnapshot.forEach(async (archivoDoc) => {
+    //   await deleteDoc(doc(db, "archivos", archivoDoc.id));
+    // });
+    
+    alert("Sección eliminada correctamente");
+    await cargarSecciones(); // Refrescar la lista
+  } catch (error) {
+    console.error("Error al eliminar sección:", error);
+    alert("No se pudo eliminar la sección. Intenta de nuevo.");
+  }
+}
 
 // ---------- ARCHIVOS ----------
 window.subirArchivo = async function() {
