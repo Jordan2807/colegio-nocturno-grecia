@@ -5,7 +5,6 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
-  updatePassword,
   onAuthStateChanged,
   getAuth,
   getApps,
@@ -23,7 +22,7 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ---------- FUNCIÓN DE PROTECCIÓN (compartida) ----------
+// ---------- PROTECCIÓN DE PÁGINAS ----------
 export async function protegerPagina(rolesPermitidos) {
   return new Promise((resolve, reject) => {
     onAuthStateChanged(auth, async (user) => {
@@ -41,7 +40,6 @@ export async function protegerPagina(rolesPermitidos) {
         window.location.href = "aula.html";
         return reject('Rol no autorizado');
       }
-      // Guardar hora de inicio si es admin (para marcar solicitudes nuevas)
       if (data.rol === "admin") {
         sessionStorage.setItem("inicioAdmin", new Date().toISOString());
       }
@@ -53,28 +51,47 @@ export async function protegerPagina(rolesPermitidos) {
 
 // ---------- LOGIN ----------
 export async function login(cedula, password) {
+  console.log("Intentando login con cédula:", cedula);
+  
   const q = query(collection(db, "usuarios"), where("cedula", "==", cedula));
   const querySnapshot = await getDocs(q);
-  if (querySnapshot.empty) throw new Error("Usuario no encontrado");
+  
+  if (querySnapshot.empty) {
+    throw new Error("Usuario no encontrado");
+  }
 
   const docUsuario = querySnapshot.docs[0];
   const data = docUsuario.data();
   const email = data.correo;
 
+  console.log("Correo asociado:", email);
+
+  // Autenticar con Firebase
   await signInWithEmailAndPassword(auth, email, password);
+  console.log("Autenticación exitosa");
 
-  if (data.estado === "pendiente") throw new Error("Cuenta pendiente de aprobación");
-  if (data.estado === "inactivo") throw new Error("Cuenta inactiva");
-  if (data.estado === "eliminado") throw new Error("Cuenta eliminada");
+  // Verificar estado
+  if (data.estado === "pendiente") {
+    throw new Error("Tu cuenta está pendiente de aprobación");
+  }
+  if (data.estado === "inactivo") {
+    throw new Error("Tu cuenta está inactiva, contacte al administrador");
+  }
+  if (data.estado === "eliminado") {
+    throw new Error("Tu cuenta fue eliminada, vuelve a registrarte");
+  }
 
-  return { uid: docUsuario.id, ...data };
+  return {
+    uid: docUsuario.id,
+    rol: data.rol,
+    ...data
+  };
 }
 
-// ---------- REGISTRO DE PROFESOR ----------
+// ---------- REGISTRO PROFESOR ----------
 export async function registrarProfesor(datos) {
   const { nombre, cedula, materia, correo, password } = datos;
 
-  // Verificar si ya existe
   const q = query(collection(db, "usuarios"), where("correo", "==", correo));
   const querySnapshot = await getDocs(q);
 
@@ -91,7 +108,6 @@ export async function registrarProfesor(datos) {
     return { existente: true };
   }
 
-  // Crear nuevo usuario
   const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
   const user = userCredential.user;
 
@@ -105,7 +121,7 @@ export async function registrarProfesor(datos) {
   return { existente: false, uid: user.uid };
 }
 
-// ---------- CERRAR SESIÓN ----------
+// ---------- LOGOUT ----------
 export async function logout() {
   await signOut(auth);
   window.location.href = "aula.html";
@@ -116,7 +132,7 @@ export async function olvidePassword(correo) {
   await sendPasswordResetEmail(auth, correo);
 }
 
-// ---------- CREAR ADMINISTRADOR (usa app secundaria) ----------
+// ---------- CREAR ADMIN (app secundaria) ----------
 export async function crearAdministrador(correo, cedula, password) {
   const firebaseConfig = {
     apiKey: "AIzaSyBXHvRtn0tIxKGNYS9drwYhB9OXY8xYkV4",
@@ -147,16 +163,40 @@ export async function crearAdministrador(correo, cedula, password) {
   return user.uid;
 }
 
-// ---------- EXPONER ALGUNAS FUNCIONES AL WINDOW (para compatibilidad con onclick existente) ----------
+// ---------- EXPOSICIÓN GLOBAL (para onclick en HTML) ----------
 window.login = async () => {
-  const cedula = document.getElementById("email")?.value;
-  const password = document.getElementById("password")?.value;
-  if (!cedula || !password) return alert("Ingrese cédula y contraseña");
+  console.log("Ejecutando window.login");
+  const cedulaInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+
+  if (!cedulaInput || !passwordInput) {
+    console.error("Campos no encontrados");
+    alert("Error: campos de formulario no disponibles");
+    return;
+  }
+
+  const cedula = cedulaInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!cedula || !password) {
+    alert("Ingrese cédula y contraseña");
+    return;
+  }
+
   try {
-    await login(cedula, password);
-    window.location.href = "admin.html"; // El login redirige según rol internamente
-  } catch (e) {
-    alert(e.message);
+    const usuario = await login(cedula, password);
+    console.log("Login exitoso, rol:", usuario.rol);
+    
+    if (usuario.rol === "admin") {
+      window.location.href = "admin.html";
+    } else if (usuario.rol === "profesor") {
+      window.location.href = "profesor.html";
+    } else {
+      window.location.href = "aula.html";
+    }
+  } catch (error) {
+    console.error("Error en login:", error);
+    alert(error.message);
   }
 };
 
@@ -196,3 +236,6 @@ window.olvidePassword = async () => {
     alert("Correo no encontrado");
   }
 };
+
+// También exponer protegerPagina para usarse en scripts inline si es necesario
+window.protegerPagina = protegerPagina;
