@@ -1,5 +1,10 @@
 // js/auth.js
-import { auth, db } from './firebase-init.js';
+import { auth, db, firebaseConfig } from './firebase-init.js';
+
+// Importaciones de App (para crear instancia secundaria)
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+// Importaciones de Auth
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -7,20 +12,14 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
   getAuth,
-  getApps,
-  getApp,
-  initializeApp
+  updatePassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// Importaciones de Firestore
 import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc
+  doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 
 // ---------- PROTECCIÓN DE PÁGINAS ----------
 export async function protegerPagina(rolesPermitidos) {
@@ -134,15 +133,7 @@ export async function olvidePassword(correo) {
 
 // ---------- CREAR ADMIN (app secundaria) ----------
 export async function crearAdministrador(correo, cedula, password) {
-  const firebaseConfig = {
-    apiKey: "AIzaSyBXHvRtn0tIxKGNYS9drwYhB9OXY8xYkV4",
-    authDomain: "aula-virtual-colegio-f3290.firebaseapp.com",
-    projectId: "aula-virtual-colegio-f3290",
-    storageBucket: "aula-virtual-colegio-f3290.firebasestorage.app",
-    messagingSenderId: "686411550211",
-    appId: "1:686411550211:web:f9ec664b4a8d1e1067c836"
-  };
-
+  // Usa firebaseConfig importado, no lo definas de nuevo
   let secondaryApp;
   if (!getApps().some(app => app.name === "Secondary")) {
     secondaryApp = initializeApp(firebaseConfig, "Secondary");
