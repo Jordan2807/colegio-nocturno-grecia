@@ -249,7 +249,7 @@ window.seleccionarYSubirArchivo = function() {
     }
 
     const widget = window.cloudinary.createUploadWidget({
-        cloudName: 'TU_CLOUD_NAME',        // <-- Reemplaza con tu Cloud Name real
+        cloudName: 'dfsikzvkn',        // <-- Reemplaza con tu Cloud Name real
         uploadPreset: 'preset_profesores', // <-- Reemplaza con tu Upload Preset real
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
