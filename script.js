@@ -713,3 +713,149 @@ alert(mensaje);
 }
 
 };
+
+/* Mostrar Ventanas - Profesores*/
+
+const sidebar = document.getElementById("sidebar");
+
+btnMenu.onclick = () => {
+sidebar.classList.toggle("active");
+};
+
+window.mostrarPerfil = function(){
+perfil.classList.remove("oculto");
+secciones.classList.add("oculto");
+archivos.classList.add("oculto");
+};
+
+window.mostrarSecciones = function(){
+perfil.classList.add("oculto");
+secciones.classList.remove("oculto");
+archivos.classList.add("oculto");
+};
+
+/* Guardar cambios perfil - Profesor*/
+
+window.guardarPerfil = async function(){
+
+const user = auth.currentUser;
+
+await updateDoc(doc(db,"usuarios",user.uid),{
+nombre: nombre.value,
+cedula: cedula.value,
+materia: materia.value
+
+});
+
+if(password.value){
+await updatePassword(user,password.value);
+}
+
+alert("Perfil actualizado");
+
+};
+
+/* Crear secciones - Profesor*/
+
+window.cargarSecciones = async function(){
+
+const user = auth.currentUser;
+
+const q = query(
+collection(db,"secciones"),
+where("profesor","==",user.uid)
+);
+
+const querySnapshot = await getDocs(q);
+
+listaSecciones.innerHTML="";
+
+querySnapshot.forEach(docu=>{
+
+const data = docu.data();
+
+listaSecciones.innerHTML += `
+
+<div class="tarjeta" onclick="abrirSeccion('${docu.id}','${data.nombre}')">
+
+${data.nombre}
+
+</div>
+
+`;
+
+});
+
+};
+
+/* Abrir seccion -Profesor*/
+window.abrirSeccion = function(id,nombre){
+
+secciones.classList.add("oculto");
+archivos.classList.remove("oculto");
+
+sessionStorage.setItem("seccionActual",id);
+
+
+tituloSeccion.innerText = nombre;
+
+cargarArchivos();
+
+};
+
+/* Subir archivo - Profesor*/
+window.subirArchivo = async function(){
+
+const file = archivo.files[0];
+
+const seccion = sessionStorage.getItem("seccionActual");
+
+const storageRef = ref(storage, "archivos/" + file.name);
+
+await uploadBytes(storageRef,file);
+
+const url = await getDownloadURL(storageRef);
+
+await addDoc(collection(db,"archivos"),{
+
+nombre:file.name,
+url:url,
+seccion:seccion
+
+});
+
+cargarArchivos();
+
+};
+
+/* Cargar archivo - Profesor*/
+window.cargarArchivos = async function(){
+
+const seccion = sessionStorage.getItem("seccionActual");
+
+const q = query(
+collection(db,"archivos"),
+where("seccion","==",seccion)
+);
+
+const querySnapshot = await getDocs(q);
+
+listaArchivos.innerHTML="";
+
+querySnapshot.forEach(docu=>{
+
+const data = docu.data();
+
+listaArchivos.innerHTML += `
+
+<div>
+
+<a href="${data.url}" target="_blank">${data.nombre}</a>
+
+</div>
+
+`;
+
+});
+
+};

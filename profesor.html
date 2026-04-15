@@ -22,6 +22,77 @@
     </header>
 
 
+    <h2 class="titulo-admin">Panel de Profesor</h2>
+
+    <main style="display:none;">
+
+    <!-- BOTON MENU -->
+    <button id="btnMenu" class="btn-menu">☰</button>
+
+    <!-- MENU LATERAL -->
+    <div id="sidebar" class="sidebar">
+
+    <h2>Profesor</h2>
+
+    <button onclick="mostrarPerfil()">Editar Perfil</button>
+    <button onclick="mostrarSecciones()">Secciones</button>
+    <button onclick="cerrarSesion()">Cerrar Sesión</button>
+
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="contenido">
+
+    <!-- PERFIL -->
+    <div id="perfil" class="seccion oculto">
+
+    <h2>Editar Perfil</h2>
+
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="text" id="cedula" placeholder="Cédula">
+    <input type="text" id="materia" placeholder="Materia">
+
+    <input type="password" id="password" placeholder="Nueva contraseña">
+
+    <button onclick="guardarPerfil()">Guardar</button>
+
+    </div>
+
+
+    <!-- SECCIONES -->
+    <div id="secciones" class="seccion">
+
+    <h2>Secciones</h2>
+
+    <div class="crear-seccion">
+
+    <input type="text" id="nombreSeccion" placeholder="Nombre sección">
+    <button onclick="crearSeccion()">Crear Sección</button>
+
+    </div>
+
+    <div id="listaSecciones" class="tarjetas"></div>
+
+    </div>
+
+
+    <!-- ARCHIVOS -->
+    <div id="archivos" class="seccion oculto">
+
+    <h2 id="tituloSeccion"></h2>
+
+    <input type="file" id="archivo">
+    <button onclick="subirArchivo()">Subir</button>
+
+    <div id="listaArchivos"></div>
+
+    </div>
+
+    </div>
+
+
+    </main>
+
 <script type="module" src="script.js"></script>
 <script type="module">protegerPagina("admin","profesor");cargarDatosProfesor();</script>
  <footer>
