@@ -830,3 +830,232 @@ font-size:16px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+
+/* ============================================= */
+/*              RESPONSIVE DESIGN                */
+/* ============================================= */
+
+/* Tablets y Móviles Grandes (hasta 992px) */
+@media (max-width: 992px) {
+    /* Header adaptable */
+    header {
+        position: relative; /* Cambiamos a relativo para que el menú lateral no lo cubra mal */
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px 10px;
+    }
+
+    .logo {
+        width: 100%;
+        max-width: 450px;
+        height: auto;
+        margin-right: 0;
+    }
+
+    nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 15px;
+        width: 100%;
+    }
+
+    nav a {
+        margin-right: 0;
+        font-size: 16px;
+        padding: 6px 10px;
+    }
+
+    /* Ajuste del main porque el header ya no es fixed */
+    main {
+        padding-top: 20px !important;
+    }
+
+    .home main {
+        padding-top: 20px !important;
+    }
+
+    section {
+        scroll-margin-top: 20px;
+    }
+
+    /* Sidebar (menú lateral del profesor) */
+    .sidebar {
+        top: 0;
+        height: 100%;
+        z-index: 1100;
+    }
+
+    .btn-menu {
+        top: 15px;
+        left: 15px;
+        z-index: 1200;
+        background-color: #FFD700;
+        color: #002b5c;
+        border: none;
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        font-size: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .contenido {
+        padding: 80px 15px 20px;
+    }
+
+    /* Contenedores de login y cajas */
+    .login-container {
+        min-height: auto;
+        padding: 20px 15px;
+        align-items: center;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 500px;
+        padding: 25px 20px;
+        margin: 20px auto;
+    }
+
+    /* Grids y tarjetas */
+    .usuarios-container {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+
+    .usuario-datos {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+    }
+
+    .usuario-botones {
+        flex-wrap: wrap;
+    }
+
+    .btn-admin {
+        flex: 1 0 40%;
+    }
+
+    /* Botones grandes de admin */
+    .btn-nuevo-admin,
+    .btn-profesor {
+        width: 90%;
+    }
+
+    /* Panel de crear admin */
+    #panelNuevoAdmin .login-box {
+        width: 95%;
+        margin: 10px auto;
+    }
+}
+
+/* Móviles Pequeños (hasta 576px) */
+@media (max-width: 576px) {
+    /* Header más compacto */
+    .logo {
+        max-width: 320px;
+    }
+
+    nav a {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+
+    .btn-aula {
+        padding: 6px 12px;
+    }
+
+    /* Títulos */
+    .titulo-admin {
+        font-size: 24px;
+        margin-top: 15px;
+    }
+
+    /* Login box */
+    .login-box {
+        padding: 20px 15px;
+    }
+
+    .login-box input {
+        padding: 14px 12px;
+        font-size: 16px; /* Evita zoom automático en iOS */
+    }
+
+    .btn-login {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    .login-botones {
+        flex-direction: column;
+    }
+
+    /* Tarjetas */
+    .tarjetas-grid,
+    .profesores-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .tarjeta {
+        padding: 20px 15px;
+    }
+
+    /* Archivos */
+    .archivo-item {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .archivo-item a {
+        font-size: 1rem;
+        word-break: break-all;
+    }
+
+    /* Secciones */
+    .seccion {
+        padding: 20px 15px;
+        margin: 15px 10px;
+    }
+
+    .crear-seccion {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .crear-seccion input {
+        width: 100%;
+    }
+
+    .crear-seccion .btn-login {
+        width: 100%;
+    }
+
+    /* Hero */
+    .hero-texto h2 {
+        font-size: 1.8rem;
+    }
+
+    .hero-texto p {
+        font-size: 1rem;
+    }
+
+    /* Footer */
+    footer {
+        padding: 15px 10px;
+        font-size: 14px;
+    }
+}
+
+/* Ajustes para evitar desbordamiento horizontal */
+* {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+img, video, iframe {
+    max-width: 100%;
+    height: auto;
+}
