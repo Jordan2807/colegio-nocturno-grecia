@@ -263,6 +263,7 @@ footer {
     padding: 40px 20px;
     text-align: center;
     max-height: 450px;
+    aspect-ratio: 16 / 9; 
 }
 
 .mapa-container {
