@@ -841,6 +841,32 @@ footer {
     flex-shrink: 0 !important;
 }
 
+/* ============================================= */
+/*   CENTRADO DEL FORMULARIO EDITAR PERFIL       */
+/* ============================================= */
+
+/* Asegura que el contenedor principal del profesor permita centrado */
+.contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* El perfil debe estar centrado y con ancho máximo adecuado */
+#perfil {
+    width: 100%;
+    max-width: 600px;        /* Ancho igual al de login-box en escritorio */
+    margin: 20px auto !important;
+    align-self: center;
+}
+
+/* Para móviles, que ocupe más ancho pero siga centrado */
+@media (max-width: 576px) {
+    #perfil {
+        max-width: 95%;
+        margin: 15px auto !important;
+    }
+}
 
 /* ============================================= */
 /*              RESPONSIVE DESIGN                */
