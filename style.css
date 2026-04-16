@@ -464,6 +464,8 @@ footer {
 .btn-activar { background: #28a745; color: white; }
 .btn-inactivar { background: #ffc107; }
 .btn-eliminar { background: #dc3545; color: white; }
+.btn-hacer-admin { background: #17a2b8;  /* Azul claro */color: white;}
+.btn-hacer-profesor { background: #6c757d;  /* Gris */color: white;}
 
 .titulo-admin {
     text-align: center;

@@ -125,6 +125,28 @@ window.crearSeccion = async function() {
   const nombreSeccion = document.getElementById("nombreSeccion")?.value;
   if (!nombreSeccion) return alert("Ingrese el nombre de la sección");
 
+  // Verificar que el profesor tenga materia registrada
+  try {
+    const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
+    if (!userDoc.exists()) {
+      alert("No se encontró el perfil del profesor");
+      return;
+    }
+    
+    const profesorData = userDoc.data();
+    const materia = profesorData.materia?.trim();
+    
+    if (!materia) {
+      alert("Debe completar el campo 'Materia' en su perfil antes de crear secciones. Vaya a 'Editar Perfil' para agregarlo.");
+      return;
+    }
+  } catch (error) {
+    console.error("Error al verificar materia:", error);
+    alert("No se pudo verificar el perfil. Intente de nuevo.");
+    return;
+  }
+
+  // Crear la sección
   await addDoc(collection(db, "secciones"), {
     nombre: nombreSeccion,
     profesor: currentUser.uid,

@@ -7,22 +7,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { crearAdministrador } from './auth.js';
 
-// Variables globales para esta página
 let usuarioActual = null;
 
-// ---------- INICIALIZACIÓN ----------
 async function init() {
   try {
     const { user, data } = await protegerPagina(['admin']);
     usuarioActual = user;
-    // El body ya se hizo visible en protegerPagina
-    
     setupPasswordToggles();
     setupEventListeners();
     await cargarUsuarios();
-  } catch (e) {
-    // Redirigido por protegerPagina
-  }
+  } catch (e) {}
 }
 
 function setupEventListeners() {
@@ -34,7 +28,6 @@ function setupEventListeners() {
   }
 }
 
-// ---------- CARGAR LISTA DE USUARIOS ----------
 async function cargarUsuarios() {
   const contenedor = document.getElementById("usuarios");
   const solicitudes = document.getElementById("solicitudes");
@@ -78,7 +71,6 @@ async function cargarUsuarios() {
     }
   });
 
-  // Mostrar/ocultar secciones
   tituloSolicitudes.style.display = haySolicitudes ? "block" : "none";
   solicitudes.style.display = haySolicitudes ? "block" : "none";
   tituloAdmins.style.display = hayAdmins ? "block" : "none";
@@ -98,6 +90,7 @@ function crearTarjetaAdmin(id, data) {
       <div class="usuario-botones">
         <button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>
         <button class="btn-admin btn-eliminar" data-id="${id}" data-accion="eliminar">Eliminar</button>
+        <button class="btn-admin btn-hacer-profesor" data-id="${id}" data-accion="hacerProfesor">Hacer Profesor</button>
       </div>
     </div>
   `;
@@ -117,18 +110,25 @@ function crearTarjetaProfesor(id, data) {
         <button class="btn-admin btn-activar" data-id="${id}" data-accion="activar">Activar</button>
         <button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>
         <button class="btn-admin btn-eliminar" data-id="${id}" data-accion="eliminar">Eliminar</button>
+        <button class="btn-admin btn-hacer-admin" data-id="${id}" data-accion="hacerAdmin">Hacer Admin</button>
       </div>
     </div>
   `;
 }
 
-// ---------- ACCIONES SOBRE USUARIOS ----------
+// Función para cambiar el rol
+async function cambiarRol(id, nuevoRol) {
+  await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
+  await cargarUsuarios();
+}
+
+// Función para cambiar estado
 async function cambiarEstado(id, nuevoEstado) {
   await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
   await cargarUsuarios();
 }
 
-// Delegación de eventos para los botones (mejor que onclick inline)
+// Delegación de eventos
 document.addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-accion]');
   if (!btn) return;
@@ -146,10 +146,19 @@ document.addEventListener('click', async (e) => {
       await cambiarEstado(id, 'eliminado');
       alert('Usuario eliminado');
     }
+  } else if (accion === 'hacerAdmin') {
+    if (confirm('¿Convertir este profesor en administrador?')) {
+      await cambiarRol(id, 'admin');
+      alert('Ahora es administrador');
+    }
+  } else if (accion === 'hacerProfesor') {
+    if (confirm('¿Convertir este administrador en profesor?')) {
+      await cambiarRol(id, 'profesor');
+      alert('Ahora es profesor');
+    }
   }
 });
 
-// ---------- REGISTRAR NUEVO ADMIN (desde el panel) ----------
 window.registrarAdmin = async function() {
   const correo = document.getElementById("correoAdmin")?.value;
   const cedula = document.getElementById("cedulaAdmin")?.value;
@@ -174,8 +183,6 @@ window.registrarAdmin = async function() {
   }
 };
 
-// Exponer cargarUsuarios por si se necesita desde consola
 window.cargarUsuarios = cargarUsuarios;
 
-// Iniciar cuando el DOM esté listo
 window.addEventListener('DOMContentLoaded', init);
