@@ -836,6 +836,21 @@ footer {
     flex-shrink: 0 !important;
 }
 
+/* Centrado garantizado para formularios de login */
+.login-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 80vh; /* o lo que prefieras */
+    padding: 20px;
+}
+
+.login-box {
+    margin: 0 auto !important;
+    width: 100%;
+    max-width: 450px; /* ajusta según prefieras */
+}
+
 /* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
