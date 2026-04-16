@@ -798,6 +798,45 @@ footer {
 }
 
 /* ============================================= */
+/*       STICKY FOOTER - CORRECCIÓN FINAL        */
+/* ============================================= */
+
+/* Aseguramos que html y body ocupen todo el alto */
+html, body {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Forzamos body como contenedor flex en columna */
+body {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+}
+
+/* El main debe crecer para ocupar el espacio disponible */
+main {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* La sección visible debe expandirse dentro de main */
+#perfil:not(.oculto),
+#secciones:not(.oculto),
+#archivos:not(.oculto) {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* El footer nunca se encoge */
+footer {
+    flex-shrink: 0 !important;
+}
+
+/* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
 
