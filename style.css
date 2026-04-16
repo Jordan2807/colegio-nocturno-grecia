@@ -880,6 +880,13 @@ font-size:16px;
         scroll-margin-top: 20px;
     }
 
+    .contenedor {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+    }
+
     /* Sidebar (menú lateral del profesor) */
     .sidebar {
         top: 0;
@@ -948,6 +955,48 @@ font-size:16px;
     #panelNuevoAdmin .login-box {
         width: 95%;
         margin: 10px auto;
+    }
+
+    .cuadro-titulo,
+    .cuadro-texto {
+        max-width: 100% !important;
+        width: 100%;
+        margin: 0;
+    }
+
+    .cuadro-titulo {
+        padding: 30px 20px;
+    }
+
+    .cuadro-texto {
+        padding: 25px 20px;
+    }
+
+    /* Layout de Valores Institucionales */
+    .layout {
+        flex-direction: column;
+        gap: 25px;
+        margin: 30px 0;
+    }
+
+    .titulo {
+        width: 100%;
+        padding: 30px 20px;
+    }
+
+    .lista {
+        grid-template-columns: 1fr; /* Una sola columna en móviles */
+        width: 100%;
+        gap: 15px;
+    }
+
+    .box {
+        padding: 25px 20px;
+    }
+
+    /* Iconos más pequeños en móviles */
+    .icono-grande {
+        font-size: 4rem !important;
     }
 }
 
@@ -1040,6 +1089,31 @@ font-size:16px;
 
     .hero-texto p {
         font-size: 1rem;
+    }
+
+     .cuadro-titulo h2 {
+        font-size: 1.8rem;
+    }
+
+    .cuadro-texto p {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .titulo h1 {
+        font-size: 1.8rem;
+    }
+
+    .titulo p {
+        font-size: 1rem;
+    }
+
+    .box h2 {
+        font-size: 1.4rem;
+    }
+
+    .icono-grande {
+        font-size: 3.5rem !important;
     }
 
     /* Footer */
