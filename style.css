@@ -764,3 +764,132 @@ font-size:16px;
 .btn-seleccionar-archivo:hover {
     background-color: #004a99;
 }
+
+/* Contenedor principal */
+.dynamic-content {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+/* Navegación (botón volver) */
+.navegacion {
+    margin-bottom: 25px;
+}
+
+.btn-volver {
+    background: none;
+    border: none;
+    color: #002b5c;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.btn-volver:hover {
+    text-decoration: underline;
+}
+
+/* Títulos de sección */
+.titulo-seccion {
+    color: #002b5c;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+/* Grid para tarjetas (profesores y secciones) */
+.tarjetas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.tarjeta {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 25px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.tarjeta i {
+    font-size: 3.5rem;
+    color: #002b5c;
+    margin-bottom: 15px;
+}
+
+.tarjeta h3 {
+    color: #002b5c;
+    margin-bottom: 8px;
+    font-size: 1.4rem;
+}
+
+.tarjeta .materia {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Lista de archivos */
+.archivos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.archivo-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: background 0.2s;
+}
+
+.archivo-item:hover {
+    background: #f0f4fa;
+}
+
+.archivo-item i {
+    margin-right: 15px;
+    color: #002b5c;
+    font-size: 1.4rem;
+    width: 24px;
+    text-align: center;
+}
+
+.archivo-item a {
+    color: #333;
+    text-decoration: none;
+    flex: 1;
+    font-size: 1.1rem;
+}
+
+.archivo-item a:hover {
+    color: #002b5c;
+    text-decoration: underline;
+}
+
+/* Mensaje vacío */
+.mensaje-vacio {
+    text-align: center;
+    color: #888;
+    padding: 50px;
+    font-style: italic;
+    font-size: 1.2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
