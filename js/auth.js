@@ -50,7 +50,6 @@ export async function protegerPagina(rolesPermitidos) {
 
 // ---------- LOGIN ----------
 export async function login(cedula, password) {
-  console.log("Intentando login con cédula:", cedula);
   
   const q = query(collection(db, "usuarios"), where("cedula", "==", cedula));
   const querySnapshot = await getDocs(q);
@@ -63,11 +62,9 @@ export async function login(cedula, password) {
   const data = docUsuario.data();
   const email = data.correo;
 
-  console.log("Correo asociado:", email);
 
   // Autenticar con Firebase
   await signInWithEmailAndPassword(auth, email, password);
-  console.log("Autenticación exitosa");
 
   // Verificar estado
   if (data.estado === "pendiente") {
@@ -156,12 +153,10 @@ export async function crearAdministrador(correo, cedula, password) {
 
 // ---------- EXPOSICIÓN GLOBAL (para onclick en HTML) ----------
 window.login = async () => {
-  console.log("Ejecutando window.login");
   const cedulaInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
 
   if (!cedulaInput || !passwordInput) {
-    console.error("Campos no encontrados");
     alert("Error: campos de formulario no disponibles");
     return;
   }
@@ -176,7 +171,6 @@ window.login = async () => {
 
   try {
     const usuario = await login(cedula, password);
-    console.log("Login exitoso, rol:", usuario.rol);
     
     if (usuario.rol === "admin") {
       window.location.href = "admin.html";
@@ -186,7 +180,6 @@ window.login = async () => {
       window.location.href = "aula.html";
     }
   } catch (error) {
-    console.error("Error en login:", error);
     alert(error.message);
   }
 };

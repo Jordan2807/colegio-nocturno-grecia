@@ -100,7 +100,6 @@ async function cargarProfesoresConSecciones() {
         });
         
     } catch (error) {
-        console.error("Error:", error);
         document.getElementById('profesoresGrid').innerHTML = 
             '<p class="mensaje-vacio">Error al cargar los profesores.</p>';
     }
@@ -162,7 +161,6 @@ async function cargarSecciones(profesorId) {
         });
         
     } catch (error) {
-        console.error("Error:", error);
         document.getElementById('seccionesGrid').innerHTML = 
             '<p class="mensaje-vacio">Error al cargar las secciones.</p>';
     }
@@ -227,7 +225,6 @@ async function cargarArchivos(seccionId) {
         lista.innerHTML = html;
         
     } catch (error) {
-        console.error("Error:", error);
         document.getElementById('archivosLista').innerHTML = 
             '<p class="mensaje-vacio">Error al cargar los archivos.</p>';
     }

@@ -110,7 +110,6 @@ window.guardarPerfil = async function() {
     if (confirmInput) confirmInput.value = "";
 
   } catch (error) {
-    console.error("Error al guardar perfil:", error);
     let mensaje = "Error al guardar los cambios";
     if (error.code === "auth/requires-recent-login") {
       mensaje = "Por seguridad, vuelve a iniciar sesión para cambiar la contraseña";
@@ -217,7 +216,6 @@ async function eliminarSeccion(id, nombre) {
       seccionActualId = null;
     }
   } catch (error) {
-    console.error("Error al eliminar sección:", error);
     alert("Error al eliminar la sección. Intenta de nuevo.");
   }
 }
@@ -237,13 +235,11 @@ window.seleccionarYSubirArchivo = function() {
         maxFileSize: 15000000,
     }, async (error, result) => {
         if (error) {
-            console.error("Error en la subida:", error);
             alert("Error al subir el archivo.");
             return;
         }
         
         if (result && result.event === "success") {
-            console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
                 result.info.original_filename, 
                 result.info.secure_url, 
@@ -268,7 +264,6 @@ async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
         await cargarArchivos();
         alert("Archivo subido correctamente");
     } catch (error) {
-        console.error("Error al guardar en Firestore:", error);
         alert("El archivo se subió, pero hubo un error al guardarlo en la base de datos.");
     }
 }
@@ -333,7 +328,6 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
     alert("Archivo eliminado correctamente");
     await cargarArchivos();
   } catch (error) {
-    console.error("Error al eliminar archivo:", error);
     alert("No se pudo eliminar el archivo.");
   }
 }
