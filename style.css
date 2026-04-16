@@ -56,13 +56,14 @@ nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
 }
 
 nav a {
     color: white;
     text-decoration: none;
     margin-right: 20px;
-    margin-top: 10px;
+    margin-top: 0px;
     font-weight: bold;
     transition: 0.3s;
 }
@@ -76,6 +77,8 @@ nav a:hover {
     color: #002b5c !important;
     padding: 8px 15px;
     border-radius: 5px;
+    margin-top: 0;
+    line-height: 1;
 }
 
 .btn-aula:hover {
