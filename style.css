@@ -852,6 +852,29 @@ footer {
 }
 
 /* ============================================= */
+/*   AJUSTE PARA FORMULARIOS LARGOS EN MÓVILES   */
+/* ============================================= */
+
+/* Aumenta el espacio superior en páginas de login/registro cuando el header es relativo */
+@media (max-width: 992px) {
+    .login-container {
+        padding-top: 30px !important;      /* Separación extra del header */
+        align-items: flex-start !important; /* Evita centrado vertical que causa corte */
+    }
+
+    .login-box {
+        margin-top: 20px;                   /* Margen adicional para que respire */
+    }
+}
+
+/* Para pantallas muy pequeñas, aumenta aún más el espacio */
+@media (max-width: 576px) {
+    .login-container {
+        padding-top: 50px !important;
+    }
+}
+
+/* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
 
