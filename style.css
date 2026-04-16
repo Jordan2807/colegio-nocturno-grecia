@@ -752,6 +752,48 @@ footer {
 }
 
 /* ============================================= */
+/*     CORRECCIÓN ICONOS BASURA Y LETRAS         */
+/* ============================================= */
+
+/* Forzar icono de basura rojo y tamaño controlado en tarjetas de sección */
+.tarjeta-seccion .btn-eliminar-seccion,
+.tarjeta-seccion .btn-eliminar-seccion i {
+    color: #dc3545 !important;
+    background: none !important;
+    border: none !important;
+    font-size: 1.5rem !important;   /* Tamaño cómodo */
+    padding: 6px 10px !important;
+    line-height: 1;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tarjeta-seccion .btn-eliminar-seccion:hover {
+    background-color: #f8d7da !important;
+    color: #b02a37 !important;
+}
+
+/* Letra más grande para el nombre de la sección */
+.tarjeta-seccion .nombre-seccion {
+    font-size: 1.3rem !important;
+    font-weight: 600;
+    color: #002b5c;
+}
+
+/* Si también usas iconos de basura en archivos, aplica el mismo rojo */
+.archivo-item .btn-eliminar-archivo,
+.archivo-item .btn-eliminar-archivo i {
+    color: #dc3545 !important;
+    background: none !important;
+    border: none !important;
+    font-size: 1.3rem !important;
+}
+
+.archivo-item .btn-eliminar-archivo:hover {
+    background-color: #f8d7da !important;
+    color: #b02a37 !important;
+}
+
+/* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
 
@@ -1017,6 +1059,16 @@ footer {
 
     .nombre-seccion {
         font-size: 1rem;
+    }
+
+        .tarjeta-seccion .btn-eliminar-seccion,
+    .tarjeta-seccion .btn-eliminar-seccion i {
+        font-size: 1.3rem !important;
+        padding: 8px !important;   /* área táctil más grande */
+    }
+
+    .tarjeta-seccion .nombre-seccion {
+        font-size: 1.1rem !important;
     }
 
     footer {

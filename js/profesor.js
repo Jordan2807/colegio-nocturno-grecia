@@ -340,3 +340,9 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
 window.cargarArchivos = cargarArchivos;
 
 window.addEventListener('DOMContentLoaded', init);
+
+window.volverASecciones = function() {
+    document.getElementById("archivos")?.classList.add("oculto");
+    document.getElementById("secciones")?.classList.remove("oculto");
+    seccionActualId = null;
+};
