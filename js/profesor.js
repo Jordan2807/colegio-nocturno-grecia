@@ -11,17 +11,29 @@ import {
 let currentUser = null;
 let seccionActualId = null;
 
-// ---------- INICIALIZACIÓN ----------
+// ---------- INICIALIZACIÓN ---------
 async function init() {
   try {
     const { user, data } = await protegerPagina(['admin', 'profesor']);
     currentUser = user;
+    
+    // Mostrar botón de admin si corresponde
+    if (data.rol === 'admin') {
+        const btnAdmin = document.getElementById('btnAdminPanel');
+        if (btnAdmin) btnAdmin.style.display = 'block';
+    }
     
     setupPasswordToggles();
     await cargarDatosProfesor(data);
     await cargarSecciones();
   } catch (e) {}
 }
+
+// Función global para redirigir al panel admin
+window.irAAdmin = function() {
+    window.location.href = 'admin.html';
+};
+
 
 async function cargarDatosProfesor(data) {
   const nombreSpan = document.getElementById("nombreProfesor");
