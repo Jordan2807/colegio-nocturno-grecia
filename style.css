@@ -3,6 +3,15 @@ body {
     margin: 0;
     font-family: 'Times New Roman', Times, serif;
     background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* HEADER */
@@ -20,20 +29,9 @@ header {
     align-items: center;
     flex-wrap: wrap;
     gap: 8%;
+    flex-shrink: 0;
 }
-/* RESPONSIVE – TELÉFONOS*/
 
-@media (max-width: 1300px) {
-
-    /* HEADER */
-    header {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        text-align: center;
-        flex-wrap: wrap;
-    }
-}
 
 /* LOGO Y TITULO */
 .logo-container {
@@ -47,13 +45,6 @@ header {
     margin-right: 15px;
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-
-    .logo-container {
-        justify-content: center;
-    }
-}
 
 .icono-grande {
     font-size: 6rem;
@@ -80,17 +71,6 @@ nav a:hover {
     flex-wrap: nowrap;
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-    
-    nav {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: center;
-        gap: 10px;
-    }
-}
-
 html {
     scroll-behavior: smooth;
 }
@@ -110,19 +90,14 @@ html {
 /* CONTENIDO */
 main {
      padding-top: 120px; 
+     flex: 1 0 auto;
 }
 
 .home main{
 padding-top: 90px; 
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-    /* ESPACIADO DEL MAIN POR HEADER */
-    main {
-        padding-top: 160px;
-    }
-}
+
 
 section {
     scroll-margin-top: 120px;
@@ -139,6 +114,7 @@ footer {
     color: white;
     text-align: center;
     padding: 20px;
+    flex-shrink: 0;
 }
 
 /* CUADROS */
@@ -176,20 +152,6 @@ footer {
     padding: 20px;
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-
-    /* CUADROS HISTORIA */
-    .contenedor {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .cuadro-titulo,
-    .cuadro-texto {
-        max-width: 90%;
-    }
-}
 
 /* IMAGEN DE FONDO */
 /* HERO reutilizable */
@@ -297,18 +259,6 @@ footer {
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-
-    /* LAYOUT VALORES */
-    .layout {
-        flex-direction: column;
-    }
-
-    .lista {
-        grid-template-columns: 1fr; /* una sola columna */
-    }
-}
 
 .mapa-seccion {
     padding: 40px 20px;
@@ -360,19 +310,6 @@ footer {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* RESPONSIVE – TELÉFONOS*/
-@media (max-width: 1300px) {
-    
-    /* CONTACTO */
-    .contacto-grid {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .contacto-item {
-        width: 90%;
-    }
-}
 
 /* CONTENEDOR LOGIN */
 .login-container {
