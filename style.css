@@ -1,11 +1,9 @@
-/* RESET BÁSICO */
-body {
-    margin: 0;
-    font-family: 'Times New Roman', Times, serif;
-    background-color: #f4f6f9;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+/* ============================================= */
+/*                  RESET BÁSICO                 */
+/* ============================================= */
+* {
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 html, body {
@@ -14,48 +12,52 @@ html, body {
     padding: 0;
 }
 
-/* HEADER */
+body {
+    margin: 0;
+    font-family: 'Times New Roman', Times, serif;
+    background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;  /* Sticky footer */
+}
+
+/* ============================================= */
+/*                    HEADER                     */
+/* ============================================= */
 header {
-    background-color:  #002b5c;
+    background-color: #002b5c;
     color: white;
     padding: 15px 20px;
-    position: fixed;   /* lo fija en la pantalla */
-    top: 0;            /* pegado arriba */
+    position: fixed;
+    top: 0;
     left: 0;
-    width: 100%;       /* ocupa todo el ancho */
-    z-index: 1000;     /* se mantiene por encima del contenido */
+    width: 100%;
+    z-index: 1000;
     display: flex;
-    justify-content:center;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     gap: 8%;
     flex-shrink: 0;
 }
 
-
-/* LOGO Y TITULO */
 .logo-container {
     display: flex;
     align-items: center;
 }
-
 
 .logo {
     width: 700px;
     margin-right: 15px;
 }
 
-
-.icono-grande {
-    font-size: 6rem;
-    transition: transform 0.3s, color 0.3s;
+/* Navegación */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-.icono-grande:hover {
-    transform: scale(1.2);
-} 
-
-/* NAVEGACIÓN */
 nav a {
     color: white;
     text-decoration: none;
@@ -63,19 +65,12 @@ nav a {
     margin-top: 10px;
     font-weight: bold;
     transition: 0.3s;
-    flex-wrap: nowrap;
 }
 
 nav a:hover {
     color: #ffd700;
-    flex-wrap: nowrap;
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
-/* BOTÓN AULA VIRTUAL DESTACADO */
 .btn-aula {
     background-color: #ffd700;
     color: #002b5c !important;
@@ -87,17 +82,18 @@ html {
     background-color: #e6c200;
 }
 
-/* CONTENIDO */
+/* ============================================= */
+/*              CONTENIDO PRINCIPAL              */
+/* ============================================= */
 main {
-     padding-top: 120px; 
-     flex: 1 0 auto;
+    padding-top: 120px;
+    flex: 1 0 auto;      /* Sticky footer */
+    padding-bottom: 0;   /* Evita espacio extra */
 }
 
-.home main{
-padding-top: 90px; 
+.home main {
+    padding-top: 90px;
 }
-
-
 
 section {
     scroll-margin-top: 120px;
@@ -108,82 +104,92 @@ section {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* FOOTER */
+/* ============================================= */
+/*                    FOOTER                     */
+/* ============================================= */
 footer {
     background-color: #002b5c;
     color: white;
     text-align: center;
     padding: 20px;
-    flex-shrink: 0;
+    flex-shrink: 0;      /* Sticky footer */
 }
 
-/* CUADROS */
-.cuadro-titulo {
-    flex: 1;                 /* permite que se ajusten automáticamente */
-    max-width: 35%;          /* evita que ocupen toda la fila */
-    background-color: white;
-    color: black;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    text-align: center;
-}
-.cuadro-texto {
-    flex: 1;                 /* permite que se ajusten automáticamente */
-    max-width: 35%;          /* evita que ocupen toda la fila */
-    background-color: white;
-    color: black;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    display: flex;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-}
-
-/* CONTENEDOR DE CUADROS*/
+/* ============================================= */
+/*          CUADROS DE HISTORIA/MISIÓN           */
+/* ============================================= */
 .contenedor {
     scroll-margin-top: 120px;
     display: flex;
-    flex-wrap: wrap;   /* permite salto de línea */
+    flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
     padding: 20px;
 }
 
+.cuadro-titulo {
+    flex: 1;
+    max-width: 35%;
+    background-color: white;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    text-align: center;
+}
 
-/* IMAGEN DE FONDO */
-/* HERO reutilizable */
+.cuadro-texto {
+    flex: 1;
+    max-width: 35%;
+    background-color: white;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.icono-grande {
+    font-size: 6rem;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.icono-grande:hover {
+    transform: scale(1.2);
+}
+
+/* ============================================= */
+/*                HERO (SLIDER)                  */
+/* ============================================= */
 .hero {
     position: relative;
-    height: 100vh; /* ocupa toda la pantalla */
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
 }
 
-/* Imagen como fondo */
 .hero-img {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* ajusta la imagen sin deformarla */
+    object-fit: cover;
     z-index: 0;
     opacity: 0;
-    transition: opacity 1s easi-in-out;
+    transition: opacity 1s ease-in-out;
 }
 
-/* Imagen visible */
 .hero-img.active {
     opacity: 1;
     transform: scale(1.05);
 }
 
-/* Capa oscura */
 .hero::after {
     content: "";
     position: absolute;
@@ -192,7 +198,6 @@ footer {
     z-index: 1;
 }
 
-/* Texto */
 .hero-texto {
     position: relative;
     z-index: 2;
@@ -201,6 +206,7 @@ footer {
     max-width: 800px;
     padding: 20px;
 }
+
 .hero-texto h2 {
     font-size: clamp(3rem, 5vw, 4rem);
 }
@@ -209,26 +215,15 @@ footer {
     font-size: clamp(1.5rem, 2.5vw, 2rem);
 }
 
-@media (max-width: 1300px) {
-
-    /* HERO */
-    .hero-texto h2 {
-        font-size: 2rem;
-    }
-
-    .hero-texto p {
-        font-size: 1.1rem;
-    }
-}
-
-/* LAYOUT DE VALORES */
+/* ============================================= */
+/*               VALORES INSTITUCIONALES         */
+/* ============================================= */
 .layout {
     display: flex;
-    gap: 20px; /* separación entre izquierda y derecha */
+    gap: 20px;
     margin: 40px 0;
 }
 
-/* cuadro grande izquierda */
 .titulo {
     flex: 1;
     background: #e0e0e0;
@@ -238,17 +233,16 @@ footer {
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 20px;
 }
 
-/* columna derecha */
 .lista {
     flex: 2;
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-    gap: 15px; /* separación entre cuadros */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
 }
 
-/* cuadros pequeños */
 .box {
     background: #f2f2f2;
     color: black;
@@ -259,7 +253,9 @@ footer {
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-
+/* ============================================= */
+/*               MAPA Y CONTACTO                 */
+/* ============================================= */
 .mapa-seccion {
     padding: 40px 20px;
     text-align: center;
@@ -273,7 +269,6 @@ footer {
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
 }
 
-/* Estilo de contacto*/
 .contacto-seccion {
     background: #f5f5f5;
     padding: 40px 20px;
@@ -310,18 +305,17 @@ footer {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-
-/* CONTENEDOR LOGIN */
+/* ============================================= */
+/*               FORMULARIOS (LOGIN)             */
+/* ============================================= */
 .login-container {
     display: flex;
     justify-content: center;
-    align-items: flex-start; 
-    min-height: calc(100vh - 120px); 
+    align-items: flex-start;
+    min-height: calc(100vh - 120px);
     padding-bottom: 20px;
 }
 
-
-/* CAJA LOGIN */
 .login-box {
     background: white;
     padding: 30px;
@@ -331,7 +325,6 @@ footer {
     text-align: center;
 }
 
-/* INPUTS */
 .login-box input {
     width: 100%;
     padding: 12px;
@@ -341,14 +334,12 @@ footer {
     font-size: 16px;
 }
 
-/* BOTONES */
 .login-botones {
     display: flex;
     gap: 10px;
     margin-top: 10px;
 }
 
-/* BOTON */
 .btn-login {
     flex: 1;
     background-color: #002b5c;
@@ -373,8 +364,7 @@ footer {
 
 .password-container input {
     width: 100%;
-    padding: 12px;
-    padding-right: 40px;
+    padding: 12px 40px 12px 12px;
     box-sizing: border-box;
 }
 
@@ -386,12 +376,9 @@ footer {
     cursor: pointer;
     color: #555;
 }
+
 .password-container i:hover {
     color: #002b5c;
-}
-
-* {
-    box-sizing: border-box;
 }
 
 .btn-estudiante {
@@ -411,279 +398,255 @@ footer {
     background-color: #ffcc00;
 }
 
-/* ADMIN USUARIOS */
-
+/* ============================================= */
+/*             PANEL DE ADMINISTRADOR            */
+/* ============================================= */
 .usuarios-container {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-gap: 20px;
-padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
 }
 
 .usuario-card {
-background: white;
-padding: 20px;
-border-radius: 10px;
-box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.usuario-datos{
-display: grid;
-grid-template-columns: repeat(5, 1fr);
-gap: 10px;
-margin-bottom: 20px;
+.usuario-datos {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.usuario-datos.admin{
-display:grid;
-grid-template-columns: repeat(3,1fr);
+.usuario-datos.admin {
+    grid-template-columns: repeat(3, 1fr);
 }
 
-.dato{
-text-align: center;
+.dato {
+    text-align: center;
 }
 
-.dato label{
-display: block;
-font-weight: bold;
-font-size: 14px;
-color: #555;
-margin-bottom: 5px;
+.dato label {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
 }
 
-.dato span{
-font-size: 16px;
-font-weight: bold;
-color: black;
+.dato span {
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
 }
 
 .usuario-botones {
-display: flex;
-justify-content: center;
-gap: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 .btn-admin {
-padding: 8px 15px;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-font-weight: bold;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.btn-activar {
-background: #28a745;
-color: white;
+.btn-activar { background: #28a745; color: white; }
+.btn-inactivar { background: #ffc107; }
+.btn-eliminar { background: #dc3545; color: white; }
+
+.titulo-admin {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 28px;
+    font-weight: bold;
 }
 
-.btn-inactivar {
-background: #ffc107;
+.btn-nuevo-admin {
+    width: 60%;
+    background: #FFD700;
+    color: #0033A0;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+    border-radius: 8px;
 }
 
-.btn-eliminar {
-background: #dc3545;
-color: white;
+.btn-profesor {
+    width: 60%;
+    background: #002b5c;
+    color: #ffffff;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+    border-radius: 8px;
 }
 
-.titulo-admin{
-text-align: center;
-margin-top: 20px;
-margin-bottom: 20px;
-font-size: 28px;
-font-weight: bold;
+#panelNuevoAdmin .login-box {
+    width: 95%;
+    margin: 10px auto;
 }
 
-.titulo-seccion{
-text-align: left;
-margin: 20px;
-font-size: 20px;
-font-weight: bold;
+/* ============================================= */
+/*             PANEL DE PROFESOR                 */
+/* ============================================= */
+.sidebar {
+    position: fixed;
+    left: -250px;
+    top: 80px;
+    width: 250px;
+    height: calc(100% - 80px);
+    background: #1e3a8a;
+    color: white;
+    padding: 20px;
+    transition: 0.3s;
+    z-index: 1000;
 }
 
-#solicitudes{
-margin-bottom: 30px;
+.sidebar.active {
+    left: 0;
 }
 
-.btn-nuevo-admin{
-width: 60%;
-background: #FFD700;
-color: #0033A0;
-padding: 15px;
-font-size: 18px;
-font-weight: bold;
-border: none;
-cursor: pointer;
-margin: 20px auto;
-display: block;
-border-radius: 8px;
+.sidebar button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: none;
+    background: #FFD700;
+    color: #1d4ed8;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
 }
 
-.btn-profesor{
-width: 60%;
-background: #002b5c;
-color: #ffffff;
-padding: 15px;
-font-size: 18px;
-font-weight: bold;
-border: none;
-cursor: pointer;
-margin: 20px auto;
-display: block;
-border-radius: 8px;
+.sidebar button:hover {
+    background: #e6c200;
 }
 
-.oculto{
-display: none;
+.btn-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 20px;
+    z-index: 1100;
+    background-color: #FFD700;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
 }
 
-.sidebar{
-position:fixed;
-left:-250px;
-top:80px;
-width:250px;
-height:calc(100% - 80px);
-background:#1e3a8a;
-color:white;
-padding:20px;
-transition:.3s;
-z-index:1000;
+.contenido {
+    padding: 100px 20px;
 }
 
-.sidebar.active{
-left:0;
+.tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
 }
 
-.sidebar button{
-width:100%;
-padding:12px;
-margin:8px 0;
-border:none;
-background:#FFD700;
-color:#1d4ed8;
-border-radius:8px;
-cursor:pointer;
-font-size:15px;
+.tarjeta {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
 }
 
-.sidebar button:hover{
-background:#e6c200;
+.seccion {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: 20px auto;
+    text-align: center;
 }
 
-.btn-menu{
-position:fixed;
-top:20px;
-left:20px;
-font-size:20px;
-z-index: 1100;
-background-color: #FFD700 ;
+.seccion input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
 }
 
-.contenido{
-padding:100px 20px;
-}
-
-.tarjetas{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:20px;
-margin-top:20px;
-}
-
-.tarjeta{
-padding:20px;
-background:white;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.2);
-cursor:pointer;
-}
-
-.seccion{
-background: white;
-padding: 25px;
-border-radius: 12px;
-box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-max-width: 1000px;
-margin: 20px auto;
-text-align: center;
-}
-
-.seccion input{
-width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:16px;
-}
-
-/* Tarjeta de sección con flex */
+/* Tarjeta de sección con botón de eliminar */
 .tarjeta-seccion {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  cursor: default;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: default;
 }
 
 .nombre-seccion {
-  flex: 1;
-  cursor: pointer;
-  font-weight: 500;
-  transition: color 0.2s;
+    flex: 1;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1.1rem;      /* Proporcional al icono */
+    transition: color 0.2s;
 }
 
 .nombre-seccion:hover {
-  color: #002b5c;
-  text-decoration: underline;
+    color: #002b5c;
+    text-decoration: underline;
 }
 
-/* Botón eliminar (icono de basura rojo) */
-.btn-eliminar-seccion {
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 5px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
+/* ====== ICONOS DE ELIMINAR (ROJOS Y TAMAÑO CONTROLADO) ====== */
+.btn-eliminar-seccion,
+.btn-eliminar-archivo {
+    background: none !important;
+    border: none !important;
+    color: #dc3545 !important;   /* Rojo forzado */
+    font-size: 1.2rem !important;
+    cursor: pointer;
+    padding: 5px 8px !important;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+    line-height: 1;
 }
 
-.btn-eliminar-seccion:hover {
-  background-color: #f8d7da;
-  color: #b02a37;
+.btn-eliminar-seccion:hover,
+.btn-eliminar-archivo:hover {
+    background-color: #f8d7da !important;
+    color: #b02a37 !important;
 }
 
+/* Lista de archivos */
 .archivo-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 .archivo-item a {
-  color: #002b5c;
-  text-decoration: none;
-  flex: 1;
+    color: #002b5c;
+    text-decoration: none;
+    flex: 1;
 }
 
 .archivo-item a:hover {
-  text-decoration: underline;
-}
-
-.btn-eliminar-archivo {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  padding: 5px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.btn-eliminar-archivo:hover {
-  background-color: #f8d7da;
+    text-decoration: underline;
 }
 
 .btn-seleccionar-archivo {
@@ -702,16 +665,13 @@ font-size:16px;
     background-color: #004a99;
 }
 
-/* Contenedor principal */
+/* ============================================= */
+/*           PÁGINA DE ESTUDIANTES               */
+/* ============================================= */
 .dynamic-content {
     max-width: 1200px;
     margin: 30px auto;
     padding: 20px;
-}
-
-/* Navegación (botón volver) */
-.navegacion {
-    margin-bottom: 25px;
 }
 
 .btn-volver {
@@ -730,16 +690,8 @@ font-size:16px;
     text-decoration: underline;
 }
 
-/* Títulos de sección */
-.titulo-seccion {
-    color: #002b5c;
-    margin-bottom: 25px;
-    font-size: 2rem;
-    text-align: center;
-}
-
-/* Grid para tarjetas (profesores y secciones) */
-.tarjetas-grid {
+.tarjetas-grid,
+.profesores-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 25px;
@@ -777,7 +729,6 @@ font-size:16px;
     font-size: 1rem;
 }
 
-/* Lista de archivos */
 .archivos-lista {
     display: flex;
     flex-direction: column;
@@ -785,41 +736,6 @@ font-size:16px;
     margin-top: 20px;
 }
 
-.archivo-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: background 0.2s;
-}
-
-.archivo-item:hover {
-    background: #f0f4fa;
-}
-
-.archivo-item i {
-    margin-right: 15px;
-    color: #002b5c;
-    font-size: 1.4rem;
-    width: 24px;
-    text-align: center;
-}
-
-.archivo-item a {
-    color: #333;
-    text-decoration: none;
-    flex: 1;
-    font-size: 1.1rem;
-}
-
-.archivo-item a:hover {
-    color: #002b5c;
-    text-decoration: underline;
-}
-
-/* Mensaje vacío */
 .mensaje-vacio {
     text-align: center;
     color: #888;
@@ -831,17 +747,19 @@ font-size:16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
+.oculto {
+    display: none !important;
+}
+
 /* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
 
 /* Tablets y Móviles Grandes (hasta 992px) */
 @media (max-width: 992px) {
-    /* Header adaptable */
     header {
-        position: relative; /* Cambiamos a relativo para que el menú lateral no lo cubra mal */
+        position: relative;
         flex-direction: column;
-        justify-content: center;
         gap: 10px;
         padding: 15px 10px;
     }
@@ -854,11 +772,8 @@ font-size:16px;
     }
 
     nav {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px 15px;
         width: 100%;
+        gap: 10px 15px;
     }
 
     nav a {
@@ -867,7 +782,6 @@ font-size:16px;
         padding: 6px 10px;
     }
 
-    /* Ajuste del main porque el header ya no es fixed */
     main {
         padding-top: 20px !important;
     }
@@ -887,7 +801,39 @@ font-size:16px;
         padding: 15px;
     }
 
-    /* Sidebar (menú lateral del profesor) */
+    .cuadro-titulo,
+    .cuadro-texto {
+        max-width: 100% !important;
+        width: 100%;
+        margin: 0;
+        padding: 25px 20px;
+    }
+
+    .layout {
+        flex-direction: column;
+        gap: 25px;
+        margin: 30px 0;
+    }
+
+    .titulo {
+        width: 100%;
+        padding: 30px 20px;
+    }
+
+    .lista {
+        grid-template-columns: 1fr;
+        width: 100%;
+        gap: 15px;
+    }
+
+    .box {
+        padding: 25px 20px;
+    }
+
+    .icono-grande {
+        font-size: 4rem !important;
+    }
+
     .sidebar {
         top: 0;
         height: 100%;
@@ -912,7 +858,6 @@ font-size:16px;
         padding: 80px 15px 20px;
     }
 
-    /* Contenedores de login y cajas */
     .login-container {
         min-height: auto;
         padding: 20px 15px;
@@ -926,7 +871,6 @@ font-size:16px;
         margin: 20px auto;
     }
 
-    /* Grids y tarjetas */
     .usuarios-container {
         grid-template-columns: 1fr;
         padding: 15px;
@@ -945,64 +889,18 @@ font-size:16px;
         flex: 1 0 40%;
     }
 
-    /* Botones grandes de admin */
     .btn-nuevo-admin,
     .btn-profesor {
         width: 90%;
     }
 
-    /* Panel de crear admin */
     #panelNuevoAdmin .login-box {
         width: 95%;
-        margin: 10px auto;
-    }
-
-    .cuadro-titulo,
-    .cuadro-texto {
-        max-width: 100% !important;
-        width: 100%;
-        margin: 0;
-    }
-
-    .cuadro-titulo {
-        padding: 30px 20px;
-    }
-
-    .cuadro-texto {
-        padding: 25px 20px;
-    }
-
-    /* Layout de Valores Institucionales */
-    .layout {
-        flex-direction: column;
-        gap: 25px;
-        margin: 30px 0;
-    }
-
-    .titulo {
-        width: 100%;
-        padding: 30px 20px;
-    }
-
-    .lista {
-        grid-template-columns: 1fr; /* Una sola columna en móviles */
-        width: 100%;
-        gap: 15px;
-    }
-
-    .box {
-        padding: 25px 20px;
-    }
-
-    /* Iconos más pequeños en móviles */
-    .icono-grande {
-        font-size: 4rem !important;
     }
 }
 
 /* Móviles Pequeños (hasta 576px) */
 @media (max-width: 576px) {
-    /* Header más compacto */
     .logo {
         max-width: 320px;
     }
@@ -1016,20 +914,18 @@ font-size:16px;
         padding: 6px 12px;
     }
 
-    /* Títulos */
     .titulo-admin {
         font-size: 24px;
         margin-top: 15px;
     }
 
-    /* Login box */
     .login-box {
         padding: 20px 15px;
     }
 
     .login-box input {
         padding: 14px 12px;
-        font-size: 16px; /* Evita zoom automático en iOS */
+        font-size: 16px;
     }
 
     .btn-login {
@@ -1041,7 +937,6 @@ font-size:16px;
         flex-direction: column;
     }
 
-    /* Tarjetas */
     .tarjetas-grid,
     .profesores-grid {
         grid-template-columns: 1fr;
@@ -1052,7 +947,6 @@ font-size:16px;
         padding: 20px 15px;
     }
 
-    /* Archivos */
     .archivo-item {
         flex-wrap: wrap;
         padding: 12px;
@@ -1063,7 +957,6 @@ font-size:16px;
         word-break: break-all;
     }
 
-    /* Secciones */
     .seccion {
         padding: 20px 15px;
         margin: 15px 10px;
@@ -1082,7 +975,6 @@ font-size:16px;
         width: 100%;
     }
 
-    /* Hero */
     .hero-texto h2 {
         font-size: 1.8rem;
     }
@@ -1091,7 +983,7 @@ font-size:16px;
         font-size: 1rem;
     }
 
-     .cuadro-titulo h2 {
+    .cuadro-titulo h2 {
         font-size: 1.8rem;
     }
 
@@ -1116,19 +1008,24 @@ font-size:16px;
         font-size: 3.5rem !important;
     }
 
-    /* Footer */
+    /* Ajuste de iconos de eliminar en móviles (área táctil más grande) */
+    .btn-eliminar-seccion,
+    .btn-eliminar-archivo {
+        font-size: 1rem !important;
+        padding: 8px !important;
+    }
+
+    .nombre-seccion {
+        font-size: 1rem;
+    }
+
     footer {
         padding: 15px 10px;
         font-size: 14px;
     }
 }
 
-/* Ajustes para evitar desbordamiento horizontal */
-* {
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
+/* Evitar desbordamiento horizontal en imágenes y vídeos */
 img, video, iframe {
     max-width: 100%;
     height: auto;
