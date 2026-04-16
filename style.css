@@ -875,6 +875,38 @@ footer {
 }
 
 /* ============================================= */
+/*   EXCEPCIÓN PARA PÁGINAS DE LOGIN/REGISTRO    */
+/* ============================================= */
+
+/* En páginas de login, el main NO debe ser flex column */
+main.pagina-login {
+    display: block !important;
+    flex: 1 0 auto !important;
+}
+
+/* Aseguramos que el contenedor login funcione correctamente */
+main.pagina-login .login-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: calc(100vh - 120px); /* Ajusta según altura del header */
+}
+
+/* En móviles, dar más espacio superior */
+@media (max-width: 992px) {
+    main.pagina-login .login-container {
+        padding-top: 80px !important; /* Aumenta para que no tape el header */
+        align-items: flex-start !important;
+    }
+}
+
+@media (max-width: 576px) {
+    main.pagina-login .login-container {
+        padding-top: 120px !important; /* Más espacio para el header apilado */
+    }
+}
+
+/* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
 
