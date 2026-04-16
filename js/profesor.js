@@ -306,24 +306,37 @@ async function cargarArchivos() {
 async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
   if (!confirm(`¿Eliminar el archivo "${nombreArchivo}"?`)) return;
 
-  const functions = getFunctions();
-  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
-
   try {
-    // 1. Eliminar de Cloudinary (llamada a la Cloud Function)
-    await eliminarDeCloudinary({ publicId: publicId });
+    // Obtener token de autenticación actual
+    const idToken = await auth.currentUser.getIdToken();
     
-    // 2. Eliminar el documento de Firestore
+    const response = await fetch(
+      'https://us-central1-aula-virtual-colegio-f3290.cloudfunctions.net/eliminarArchivoCloudinary',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ publicId })
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error al eliminar');
+    }
+
+    // Eliminar de Firestore
     await deleteDoc(doc(db, "archivos", idFirestore));
     
     alert("Archivo eliminado correctamente");
     await cargarArchivos();
   } catch (error) {
     console.error("Error al eliminar archivo:", error);
-    alert("No se pudo eliminar el archivo. Intenta de nuevo.");
+    alert("No se pudo eliminar el archivo.");
   }
 }
-
 window.cargarArchivos = cargarArchivos;
 
 window.addEventListener('DOMContentLoaded', init);
