@@ -793,6 +793,10 @@ footer {
     color: #b02a37 !important;
 }
 
+#archivos {
+    margin-bottom: 0 !important;
+}
+
 /* ============================================= */
 /*              RESPONSIVE DESIGN                */
 /* ============================================= */
@@ -880,6 +884,7 @@ footer {
         top: 0;
         height: 100%;
         z-index: 1100;
+        padding-top: 70px;
     }
 
     .btn-menu {
