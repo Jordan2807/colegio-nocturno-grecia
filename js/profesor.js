@@ -261,22 +261,33 @@ window.seleccionarYSubirArchivo = function() {
     }
 
     const widget = window.cloudinary.createUploadWidget({
-        cloudName: 'dfsikzvkn',        // <-- Reemplaza con tu Cloud Name real
-        uploadPreset: 'preset_profesores', // <-- Reemplaza con tu Upload Preset real
+        cloudName: 'dfsikzvkn',
+        uploadPreset: 'preset_profesores',
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
         maxFileSize: 15000000,
+        // Generar publicId único: nombre_original_XXXXXX
+        publicId: (file) => {
+            // Eliminar extensión y caracteres no seguros
+            const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+            // Generar sufijo aleatorio de 6 caracteres
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            return `${baseName}_${randomSuffix}`;
+        },
+        overwrite: false   // No sobrescribir si ya existe (redundante con el sufijo aleatorio)
     }, async (error, result) => {
         if (error) {
+            console.error("Error en la subida:", error);
             alert("Error al subir el archivo.");
             return;
         }
         
         if (result && result.event === "success") {
+            console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
-                result.info.original_filename, 
-                result.info.secure_url, 
+                result.info.original_filename,
+                result.info.secure_url,
                 result.info.public_id
             );
         }
