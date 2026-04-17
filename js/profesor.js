@@ -265,9 +265,7 @@ window.seleccionarYSubirArchivo = function() {
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        use_filename: true,        // Usa el nombre original del archivo como base
-        unique_filename: true,     // Añade sufijo aleatorio automáticamente
-        // No definimos 'publicId' manualmente para evitar conflictos
+        maxFileSize: 15000000
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
@@ -277,10 +275,11 @@ window.seleccionarYSubirArchivo = function() {
         
         if (result && result.event === "success") {
             console.log("Subida exitosa:", result.info);
+            // Cloudinary genera un public_id automático
             await guardarArchivoEnFirestore(
                 result.info.original_filename,
                 result.info.secure_url,
-                result.info.public_id
+                result.info.public_id       // ← Este es el ID que necesitamos para eliminar
             );
         }
     });
