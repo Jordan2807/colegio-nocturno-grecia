@@ -11,7 +11,7 @@ import {
 let currentUser = null;
 let seccionActualId = null;
 
-// ---------- INICIALIZACIÓN ---------
+// ---------- INICIALIZACIÓN ----------
 async function init() {
   try {
     const { user, data } = await protegerPagina(['admin', 'profesor']);
@@ -33,7 +33,6 @@ async function init() {
 window.irAAdmin = function() {
     window.location.href = 'admin.html';
 };
-
 
 async function cargarDatosProfesor(data) {
   const nombreSpan = document.getElementById("nombreProfesor");
@@ -261,28 +260,19 @@ window.seleccionarYSubirArchivo = function() {
     }
 
     const widget = window.cloudinary.createUploadWidget({
-        cloudName: 'dfsikzvkn',
-        uploadPreset: 'preset_profesores',
+        cloudName: 'dfsikzvkn',        // <-- Reemplaza con tu Cloud Name real
+        uploadPreset: 'preset_profesores', // <-- Reemplaza con tu Upload Preset real
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
         maxFileSize: 15000000,
-        publicId: (file) => {
-            // Limpiar nombre original y agregar sufijo único
-            const base = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-            const random = Math.random().toString(36).substring(2, 8);
-            return `${base}_${random}`;
-        }
-        // ELIMINA overwrite: false
     }, async (error, result) => {
         if (error) {
-            console.error("Error en la subida:", error);
             alert("Error al subir el archivo.");
             return;
         }
         
         if (result && result.event === "success") {
-            console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
                 result.info.original_filename, 
                 result.info.secure_url, 
