@@ -292,7 +292,7 @@ window.seleccionarYSubirArchivo = function() {
     widget.open();
 };
 
-// gUARDAR METADATOS EN FIRESTORE
+// GUARDAR METADATOS EN FIRESTORE
 async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
     try {
         await addDoc(collection(db, "archivos"), {
