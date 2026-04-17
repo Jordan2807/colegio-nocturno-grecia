@@ -176,15 +176,12 @@ window.registrarAdmin = async function() {
   try {
     await crearAdministrador(correo, nombre, cedula, password);
     alert("Administrador creado correctamente");
-    
-    // Limpiar formulario
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
     document.getElementById("correoAdmin").value = "";
     document.getElementById("nombreAdmin").value = "";
     document.getElementById("cedulaAdmin").value = "";
     document.getElementById("password").value = "";
     document.getElementById("confirmPassword").value = "";
-    
     await cargarUsuarios();
   } catch (e) {
     alert("Error: " + e.message);

@@ -187,20 +187,23 @@ window.login = async () => {
 };
 
 window.registrar = async () => {
-  const nombre = document.getElementById("nombre")?.value;
-  const cedula = document.getElementById("cedula")?.value;
-  const materia = document.getElementById("materia")?.value;
-  const correo = document.getElementById("correo")?.value;
-  const password = document.getElementById("password")?.value;
-  const confirm = document.getElementById("confirmPassword")?.value;
+  const nombreInput = document.getElementById("nombre");
+  const cedulaInput = document.getElementById("cedula");
+  const materiaInput = document.getElementById("materia");
+  const correoInput = document.getElementById("correo");
+  const passwordInput = document.getElementById("password");
+  const confirmInput = document.getElementById("confirmPassword");
 
-    // Limpiar espacios al inicio y final
-  const nombre = nombreInput?.value.trim();
-  const cedula = cedulaInput?.value.trim();
-  const materia = materiaInput?.value.trim();
-  const correo = correoInput?.value.trim();
-  const password = passwordInput?.value;
-  const confirm = confirmInput?.value;
+  if (!nombreInput || !cedulaInput || !materiaInput || !correoInput || !passwordInput || !confirmInput) {
+    return alert("Error: No se encontraron todos los campos del formulario");
+  }
+
+  const nombre = nombreInput.value.trim();
+  const cedula = cedulaInput.value.trim();
+  const materia = materiaInput.value.trim();
+  const correo = correoInput.value.trim();
+  const password = passwordInput.value;
+  const confirm = confirmInput.value;
 
   if (!nombre || !cedula || !materia || !correo || !password || !confirm) {
     return alert("Todos los campos son obligatorios");

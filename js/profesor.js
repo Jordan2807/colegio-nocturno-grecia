@@ -85,19 +85,11 @@ window.guardarPerfil = async function() {
   const password = passwordInput?.value;
   const confirm = confirmInput?.value;
 
-  const nombre = nombreInput?.value.trim();
-  const cedula = cedulaInput?.value.trim();
-  const materia = materiaInput?.value.trim();
-  const password = passwordInput?.value;
-  const confirm = confirmInput?.value;
-
-  // Validar campos obligatorios
   if (!nombre || !cedula || !materia) {
     alert("Nombre, cédula y materia son obligatorios");
     return;
   }
 
-  // Si se intenta cambiar la contraseña
   if (password || confirm) {
     if (password !== confirm) {
       alert("Las contraseñas no coinciden");
@@ -110,25 +102,21 @@ window.guardarPerfil = async function() {
   }
 
   try {
-    // Actualizar datos en Firestore
     await updateDoc(doc(db, "usuarios", currentUser.uid), {
       nombre,
       cedula,
       materia
     });
 
-    // Actualizar contraseña en Auth si se proporcionó
     if (password) {
       await updatePassword(currentUser, password);
     }
 
     alert("Perfil actualizado correctamente");
-
-    // Limpiar campos de contraseña por seguridad
-    if (passwordInput) passwordInput.value = "";
-    if (confirmInput) confirmInput.value = "";
-
+    passwordInput.value = "";
+    confirmInput.value = "";
   } catch (error) {
+    console.error("Error al guardar perfil:", error);
     let mensaje = "Error al guardar los cambios";
     if (error.code === "auth/requires-recent-login") {
       mensaje = "Por seguridad, vuelve a iniciar sesión para cambiar la contraseña";
