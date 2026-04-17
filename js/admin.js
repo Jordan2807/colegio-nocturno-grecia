@@ -83,7 +83,8 @@ function crearTarjetaAdmin(id, data) {
   return `
     <div class="usuario-card">
       <div class="usuario-datos admin">
-        <div class="dato"><label>Nombre</label><span>${data.cedula}</span></div>
+        <div class="dato"><label>Nombre</label><span>${data.nombre || '—'}</span></div>
+        <div class="dato"><label>Cédula</label><span>${data.cedula || '—'}</span></div>
         <div class="dato"><label>Correo</label><span>${data.correo}</span></div>
         <div class="dato"><label>Estado</label><span>${data.estado}</span></div>
       </div>
@@ -161,22 +162,29 @@ document.addEventListener('click', async (e) => {
 
 window.registrarAdmin = async function() {
   const correo = document.getElementById("correoAdmin")?.value;
+  const nombre = document.getElementById("nombreAdmin")?.value;
   const cedula = document.getElementById("cedulaAdmin")?.value;
   const password = document.getElementById("password")?.value;
   const confirm = document.getElementById("confirmPassword")?.value;
 
-  if (!correo || !cedula || !password || !confirm) return alert("Todos los campos son obligatorios");
+  if (!correo || !nombre || !cedula || !password || !confirm) {
+    return alert("Todos los campos son obligatorios");
+  }
   if (password !== confirm) return alert("Las contraseñas no coinciden");
   if (password.length < 6) return alert("Contraseña muy débil");
 
   try {
-    await crearAdministrador(correo, cedula, password);
-    alert("Administrador creado");
+    await crearAdministrador(correo, nombre, cedula, password);
+    alert("Administrador creado correctamente");
+    
+    // Limpiar formulario
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
     document.getElementById("correoAdmin").value = "";
+    document.getElementById("nombreAdmin").value = "";
     document.getElementById("cedulaAdmin").value = "";
     document.getElementById("password").value = "";
     document.getElementById("confirmPassword").value = "";
+    
     await cargarUsuarios();
   } catch (e) {
     alert("Error: " + e.message);

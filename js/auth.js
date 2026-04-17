@@ -129,8 +129,8 @@ export async function olvidePassword(correo) {
 }
 
 // ---------- CREAR ADMIN (app secundaria) ----------
-export async function crearAdministrador(correo, cedula, password) {
-  // Usa firebaseConfig importado, no lo definas de nuevo
+// auth.js - función crearAdministrador actualizada
+export async function crearAdministrador(correo, nombre, cedula, password) {
   let secondaryApp;
   if (!getApps().some(app => app.name === "Secondary")) {
     secondaryApp = initializeApp(firebaseConfig, "Secondary");
@@ -142,10 +142,12 @@ export async function crearAdministrador(correo, cedula, password) {
   const user = userCredential.user;
 
   await setDoc(doc(db, "usuarios", user.uid), {
-    correo,
-    cedula,
+    nombre: nombre,
+    cedula: cedula,
+    correo: correo,
     rol: "admin",
-    estado: "activo"
+    estado: "activo",
+    fecha: new Date()
   });
 
   return user.uid;
