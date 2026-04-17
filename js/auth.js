@@ -87,34 +87,18 @@ export async function login(cedula, password) {
 // ---------- REGISTRO PROFESOR ----------
 export async function registrarProfesor(datos) {
   const { nombre, cedula, materia, correo, password } = datos;
-
-  const q = query(collection(db, "usuarios"), where("correo", "==", correo));
-  const querySnapshot = await getDocs(q);
-
-  if (!querySnapshot.empty) {
-    const docExistente = querySnapshot.docs[0];
-    const data = docExistente.data();
-    if (data.estado === "eliminado") {
-      await updateDoc(doc(db, "usuarios", docExistente.id), {
-        nombre, cedula, materia, correo, fecha: new Date()
-      });
-    }
-    await sendPasswordResetEmail(auth, data.correo);
-    await updateDoc(doc(db, "usuarios", docExistente.id), { estado: "pendiente" });
-    return { existente: true };
-  }
-
   const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
   const user = userCredential.user;
 
   await setDoc(doc(db, "usuarios", user.uid), {
-    nombre, cedula, materia, correo,
+    nombre,
+    cedula,
+    materia,
+    correo,
     rol: "profesor",
     estado: "pendiente",
     fecha: new Date()
   });
-
-  return { existente: false, uid: user.uid };
 }
 
 // ---------- LOGOUT ----------
@@ -212,9 +196,64 @@ window.registrar = async () => {
   if (password.length < 6) return alert("Contraseña muy débil");
 
   try {
+    // 1. Verificar si la cédula ya está registrada
+    const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
+    const cedulaSnapshot = await getDocs(cedulaQuery);
+    
+    if (!cedulaSnapshot.empty) {
+      const docExistente = cedulaSnapshot.docs[0];
+      const data = docExistente.data();
+      
+      if (data.estado === "eliminado") {
+        // Reactivar cuenta eliminada
+        await updateDoc(doc(db, "usuarios", docExistente.id), {
+          nombre,
+          materia,
+          correo,
+          estado: "pendiente",
+          fecha: new Date()
+        });
+        await sendPasswordResetEmail(auth, data.correo);
+        alert("Tu cuenta estaba eliminada. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.");
+        window.location.href = "aula.html";
+        return;
+      } else {
+        // Cédula ya registrada y activa/pendiente/inactiva
+        alert("La cédula ingresada ya está registrada en el sistema.");
+        return;
+      }
+    }
+    
+    // 2. Verificar si el correo ya existe (comportamiento original)
+    const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
+    const correoSnapshot = await getDocs(correoQuery);
+    
+    if (!correoSnapshot.empty) {
+      const docExistente = correoSnapshot.docs[0];
+      const data = docExistente.data();
+      if (data.estado === "eliminado") {
+        await updateDoc(doc(db, "usuarios", docExistente.id), {
+          nombre,
+          cedula,
+          materia,
+          fecha: new Date()
+        });
+        await sendPasswordResetEmail(auth, data.correo);
+        await updateDoc(doc(db, "usuarios", docExistente.id), { estado: "pendiente" });
+        alert("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.");
+        window.location.href = "aula.html";
+        return;
+      } else {
+        alert("El correo electrónico ya está en uso por otra cuenta.");
+        return;
+      }
+    }
+    
+    // 3. Si no hay conflictos, crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
     alert("Solicitud enviada al administrador");
     window.location.href = "aula.html";
+    
   } catch (e) {
     alert("Error: " + e.message);
   }
@@ -223,14 +262,47 @@ window.registrar = async () => {
 window.logout = logout;
 
 window.olvidePassword = async () => {
-  const correo = document.getElementById("correo")?.value;
-  if (!correo) return alert("Ingrese su correo");
+  const correoInput = document.getElementById("correo");
+  if (!correoInput) return;
+  
+  const correo = correoInput.value.trim();
+  if (!correo) {
+    alert("Ingrese su correo electrónico");
+    return;
+  }
+
   try {
-    await olvidePassword(correo);
-    alert("Correo de restablecimiento enviado");
+    // 1. Verificar si el correo existe en Firestore
+    const q = query(collection(db, "usuarios"), where("correo", "==", correo));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      alert("El correo ingresado no está registrado en el sistema.");
+      return;
+    }
+
+    // 2. Verificar que el usuario no esté eliminado o inactivo
+    const docUsuario = querySnapshot.docs[0];
+    const data = docUsuario.data();
+    
+    if (data.estado === "eliminado") {
+      alert("Esta cuenta ha sido eliminada. Contacte al administrador.");
+      return;
+    }
+    
+    if (data.estado === "inactivo") {
+      alert("Esta cuenta está inactiva. Contacte al administrador.");
+      return;
+    }
+
+    // 3. Enviar correo de restablecimiento
+    await sendPasswordResetEmail(auth, correo);
+    alert("Se ha enviado un enlace de restablecimiento a su correo.");
     window.location.href = "aula.html";
-  } catch (e) {
-    alert("Correo no encontrado");
+    
+  } catch (error) {
+    console.error("Error al procesar solicitud:", error);
+    alert("Ocurrió un error. Intente de nuevo más tarde.");
   }
 };
 

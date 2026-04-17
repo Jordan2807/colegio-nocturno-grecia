@@ -80,18 +80,28 @@ async function cargarUsuarios() {
 }
 
 function crearTarjetaAdmin(id, data) {
+  const estado = data.estado || 'activo';
+  // Mostrar botones según estado
+  const botones = [];
+  if (estado !== 'activo') {
+    botones.push(`<button class="btn-admin btn-activar" data-id="${id}" data-accion="activar">Activar</button>`);
+  }
+  if (estado !== 'inactivo') {
+    botones.push(`<button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>`);
+  }
+  botones.push(`<button class="btn-admin btn-eliminar" data-id="${id}" data-accion="eliminar">Eliminar</button>`);
+  botones.push(`<button class="btn-admin btn-hacer-profesor" data-id="${id}" data-accion="hacerProfesor">Hacer Profesor</button>`);
+
   return `
     <div class="usuario-card">
       <div class="usuario-datos admin">
         <div class="dato"><label>Nombre</label><span>${data.nombre || '—'}</span></div>
         <div class="dato"><label>Cédula</label><span>${data.cedula || '—'}</span></div>
         <div class="dato"><label>Correo</label><span>${data.correo}</span></div>
-        <div class="dato"><label>Estado</label><span>${data.estado}</span></div>
+        <div class="dato"><label>Estado</label><span>${estado}</span></div>
       </div>
       <div class="usuario-botones">
-        <button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>
-        <button class="btn-admin btn-eliminar" data-id="${id}" data-accion="eliminar">Eliminar</button>
-        <button class="btn-admin btn-hacer-profesor" data-id="${id}" data-accion="hacerProfesor">Hacer Profesor</button>
+        ${botones.join('')}
       </div>
     </div>
   `;
@@ -174,19 +184,83 @@ window.registrarAdmin = async function() {
   if (password.length < 6) return alert("Contraseña muy débil");
 
   try {
+    // 1. Verificar si la cédula ya existe
+    const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
+    const cedulaSnapshot = await getDocs(cedulaQuery);
+    
+    if (!cedulaSnapshot.empty) {
+      const docExistente = cedulaSnapshot.docs[0];
+      const data = docExistente.data();
+      
+      if (data.estado === "eliminado") {
+        // Reactivar cuenta eliminada actualizando a admin
+        await updateDoc(doc(db, "usuarios", docExistente.id), {
+          nombre,
+          correo,
+          rol: "admin",
+          estado: "activo",
+          fecha: new Date()
+        });
+        // Enviar reset de contraseña para que pueda establecer una nueva
+        await sendPasswordResetEmail(auth, data.correo);
+        alert("La cédula pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.");
+        document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
+        limpiarFormularioAdmin();
+        await cargarUsuarios();
+        return;
+      } else {
+        alert("La cédula ingresada ya está registrada en el sistema.");
+        return;
+      }
+    }
+    
+    // 2. Verificar si el correo ya existe
+    const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
+    const correoSnapshot = await getDocs(correoQuery);
+    
+    if (!correoSnapshot.empty) {
+      const docExistente = correoSnapshot.docs[0];
+      const data = docExistente.data();
+      
+      if (data.estado === "eliminado") {
+        await updateDoc(doc(db, "usuarios", docExistente.id), {
+          nombre,
+          cedula,
+          rol: "admin",
+          estado: "activo",
+          fecha: new Date()
+        });
+        await sendPasswordResetEmail(auth, data.correo);
+        alert("El correo pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.");
+        document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
+        limpiarFormularioAdmin();
+        await cargarUsuarios();
+        return;
+      } else {
+        alert("El correo electrónico ya está en uso por otra cuenta.");
+        return;
+      }
+    }
+    
+    // 3. Si no hay conflictos, crear nuevo administrador
     await crearAdministrador(correo, nombre, cedula, password);
     alert("Administrador creado correctamente");
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
-    document.getElementById("correoAdmin").value = "";
-    document.getElementById("nombreAdmin").value = "";
-    document.getElementById("cedulaAdmin").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("confirmPassword").value = "";
+    limpiarFormularioAdmin();
     await cargarUsuarios();
   } catch (e) {
     alert("Error: " + e.message);
   }
 };
+
+// Función auxiliar para limpiar campos
+function limpiarFormularioAdmin() {
+  document.getElementById("correoAdmin").value = "";
+  document.getElementById("nombreAdmin").value = "";
+  document.getElementById("cedulaAdmin").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("confirmPassword").value = "";
+}
 
 window.cargarUsuarios = cargarUsuarios;
 
