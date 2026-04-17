@@ -265,8 +265,7 @@ window.seleccionarYSubirArchivo = function() {
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        maxFileSize: 15000000,
-        type: 'upload',                    // <-- ¡AGREGA ESTA LÍNEA!
+        maxFileSize: 15000000,                   
         publicId: (file) => {
             const base = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
             const random = Math.random().toString(36).substring(2, 8);
