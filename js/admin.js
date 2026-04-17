@@ -1,17 +1,18 @@
 // js/admin.js
 import { auth, db } from './firebase-init.js';
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
-  collection, getDocs, doc, updateDoc, query, where   // ← Agregar query y where
+  collection, getDocs, doc, updateDoc, query, where, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { crearAdministrador } from './auth.js';
 import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
-// Importar sendPasswordResetEmail desde Auth
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let usuarioActual = null;
 
+// ---------- INICIALIZACIÓN ----------
 async function init() {
   try {
     const { user, data } = await protegerPagina(['admin']);
@@ -31,6 +32,7 @@ function setupEventListeners() {
   }
 }
 
+// ---------- CARGAR LISTA DE USUARIOS ----------
 async function cargarUsuarios() {
   const contenedor = document.getElementById("usuarios");
   const solicitudes = document.getElementById("solicitudes");
@@ -52,7 +54,6 @@ async function cargarUsuarios() {
 
   querySnapshot.forEach((docu) => {
     const data = docu.data();
-    if (data.estado === "eliminado") return;
 
     const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
     const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
@@ -85,7 +86,6 @@ async function cargarUsuarios() {
 function crearTarjetaAdmin(id, data) {
   const estado = data.estado || 'activo';
   const estadoFormateado = estado.charAt(0).toUpperCase() + estado.slice(1);
-  // Mostrar botones según estado
   const botones = [];
   if (estado !== 'activo') {
     botones.push(`<button class="btn-admin btn-activar" data-id="${id}" data-accion="activar">Activar</button>`);
@@ -115,7 +115,6 @@ function crearTarjetaProfesor(id, data) {
   const estado = data.estado;
   const estadoFormateado = estado.charAt(0).toUpperCase() + estado.slice(1);
   
-  // Determinar visibilidad de botones según estado
   const mostrarActivar = estado === 'pendiente' || estado === 'inactivo';
   const mostrarInactivar = estado === 'pendiente' || estado === 'activo';
   
@@ -138,19 +137,47 @@ function crearTarjetaProfesor(id, data) {
   `;
 }
 
-// Función para cambiar el rol
+// ---------- FUNCIONES AUXILIARES ----------
 async function cambiarRol(id, nuevoRol) {
   await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
   await cargarUsuarios();
 }
 
-// Función para cambiar estado
 async function cambiarEstado(id, nuevoEstado) {
   await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
   await cargarUsuarios();
 }
 
-// Delegación de eventos
+// ---------- ELIMINACIÓN DE SECCIÓN----------
+async function eliminarSeccionCompleta(seccionId) {
+  const functions = getFunctions();
+  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
+
+  const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", seccionId));
+  const archivosSnapshot = await getDocs(archivosQuery);
+
+  const errores = [];
+  for (const archivoDoc of archivosSnapshot.docs) {
+    const archivoData = archivoDoc.data();
+    const publicId = archivoData.publicId;
+    if (!publicId) continue;
+    try {
+      await eliminarDeCloudinary({ publicId });
+      await deleteDoc(doc(db, "archivos", archivoDoc.id));
+    } catch (error) {
+      console.error(`Error eliminando archivo ${archivoData.nombre}:`, error);
+      errores.push(archivoData.nombre);
+    }
+  }
+
+  if (errores.length > 0) {
+    throw new Error(`No se pudieron eliminar los siguientes archivos:\n- ${errores.join('\n- ')}`);
+  }
+
+  await deleteDoc(doc(db, "secciones", seccionId));
+}
+
+// ---------- DELEGACIÓN DE EVENTOS ----------
 document.addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-accion]');
   if (!btn) return;
@@ -164,9 +191,47 @@ document.addEventListener('click', async (e) => {
     await cambiarEstado(id, 'inactivo');
     await mostrarAlerta('Usuario inactivado', 'warning');
   } else if (accion === 'eliminar') {
-    if (await mostrarConfirmacion('¿Eliminar usuario?', 'Confirmar')) {
-      await cambiarEstado(id, 'eliminado');
-      await mostrarAlerta('Usuario eliminado', 'warning');
+    const confirmado = await mostrarConfirmacion(
+      '¿Eliminar permanentemente al usuario? Se borrarán todas sus secciones, archivos y la cuenta de acceso. Esta acción no se puede deshacer.'
+    );
+    if (!confirmado) return;
+
+    try {
+      const usuarioDoc = await getDoc(doc(db, "usuarios", id));
+      if (!usuarioDoc.exists()) {
+        await mostrarAlerta('El usuario ya no existe.', 'info');
+        await cargarUsuarios();
+        return;
+      }
+      const usuarioData = usuarioDoc.data();
+      const uid = id;
+
+      // 1. Eliminar todas las secciones que pertenezcan al usuario (sin importar su rol)
+      const seccionesQuery = query(collection(db, "secciones"), where("profesor", "==", uid));
+      const seccionesSnapshot = await getDocs(seccionesQuery);
+      
+      for (const seccionDoc of seccionesSnapshot.docs) {
+        try {
+          await eliminarSeccionCompleta(seccionDoc.id);
+        } catch (error) {
+          await mostrarAlerta(`Error al eliminar la sección "${seccionDoc.data().nombre}": ${error.message}`, 'error');
+          return;
+        }
+      }
+
+      // 2. Eliminar documento de Firestore
+      await deleteDoc(doc(db, "usuarios", uid));
+
+      // 3. Eliminar de Authentication mediante Cloud Function
+      const functions = getFunctions();
+      const eliminarDeAuth = httpsCallable(functions, 'eliminarUsuarioAuth');
+      await eliminarDeAuth({ uid });
+
+      await mostrarAlerta('Usuario eliminado permanentemente junto con todos sus datos.', 'success');
+      await cargarUsuarios();
+    } catch (error) {
+      console.error('Error en eliminación completa:', error);
+      await mostrarAlerta('Error al eliminar usuario: ' + error.message, 'error');
     }
   } else if (accion === 'hacerAdmin') {
     if (await mostrarConfirmacion('¿Convertir este profesor en administrador?', 'Confirmar')) {
@@ -181,6 +246,7 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+// ---------- REGISTRAR NUEVO ADMINISTRADOR----------
 window.registrarAdmin = async function() {
   const correo = document.getElementById("correoAdmin")?.value.trim();
   const nombre = document.getElementById("nombreAdmin")?.value.trim();
@@ -195,74 +261,23 @@ window.registrarAdmin = async function() {
   if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
   try {
+    // Verificar cédula única
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
-
     if (!cedulaSnapshot.empty) {
-      const docExistente = cedulaSnapshot.docs[0];
-      const data = docExistente.data();
-      
-      if (data.estado === "eliminado") {
-        // Verificar que el correo coincida con el registrado
-        if (data.correo !== correo) {
-          await mostrarAlerta("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.", "error");
-          return;
-        }
-        // Reactivar cuenta eliminada actualizando a admin
-        await updateDoc(doc(db, "usuarios", docExistente.id), {
-          nombre,
-          correo,
-          rol: "admin",
-          estado: "activo",
-          fecha: new Date()
-        });
-        await sendPasswordResetEmail(auth, data.correo);
-        await mostrarAlerta("La cédula pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.", "info");
-        document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
-        limpiarFormularioAdmin();
-        await cargarUsuarios();
-        return;
-      } else {
-        await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
-        return;
-      }
+      await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
+      return;
     }
 
-    // 2. Verificar si el correo ya existe
+    // Verificar correo único
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
-
     if (!correoSnapshot.empty) {
-      const docExistente = correoSnapshot.docs[0];
-      const data = docExistente.data();
-      
-      if (data.estado === "eliminado") {
-        // Verificar que la cédula coincida con la registrada
-        if (data.cedula !== cedula) {
-          await mostrarAlerta("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.", "error");
-          return;
-        }
-        // Reactivar cuenta eliminada actualizando a admin
-        await updateDoc(doc(db, "usuarios", docExistente.id), {
-          nombre,
-          cedula,
-          rol: "admin",
-          estado: "activo",
-          fecha: new Date()
-        });
-        await sendPasswordResetEmail(auth, data.correo);
-        await mostrarAlerta("El correo pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.", "info");
-        document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
-        limpiarFormularioAdmin();
-        await cargarUsuarios();
-        return;
-      } else {
-        await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
-        return;
-      }
+      await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
+      return;
     }
-    
-    // 3. Si no hay conflictos, crear nuevo administrador
+
+    // Crear nuevo administrador
     await crearAdministrador(correo, nombre, cedula, password);
     await mostrarAlerta("Administrador creado correctamente", "success");
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
@@ -273,7 +288,6 @@ window.registrarAdmin = async function() {
   }
 };
 
-// Función auxiliar para limpiar campos
 function limpiarFormularioAdmin() {
   document.getElementById("correoAdmin").value = "";
   document.getElementById("nombreAdmin").value = "";
@@ -283,5 +297,4 @@ function limpiarFormularioAdmin() {
 }
 
 window.cargarUsuarios = cargarUsuarios;
-
 window.addEventListener('DOMContentLoaded', init);

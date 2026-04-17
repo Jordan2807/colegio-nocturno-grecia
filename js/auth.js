@@ -1,6 +1,6 @@
 // js/auth.js
 import { auth, db, firebaseConfig } from './firebase-init.js';
-import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+import { mostrarAlerta } from './utils.js';
 
 // Importaciones de App (para crear instancia secundaria)
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -51,7 +51,6 @@ export async function protegerPagina(rolesPermitidos) {
 
 // ---------- LOGIN ----------
 export async function login(cedula, password) {
-  
   const q = query(collection(db, "usuarios"), where("cedula", "==", cedula));
   const querySnapshot = await getDocs(q);
   
@@ -63,7 +62,6 @@ export async function login(cedula, password) {
   const data = docUsuario.data();
   const email = data.correo;
 
-
   // Autenticar con Firebase
   await signInWithEmailAndPassword(auth, email, password);
 
@@ -74,9 +72,7 @@ export async function login(cedula, password) {
   if (data.estado === "inactivo") {
     throw new Error("Tu cuenta está inactiva, contacte al administrador");
   }
-  if (data.estado === "eliminado") {
-    throw new Error("Tu cuenta fue eliminada, vuelve a registrarte");
-  }
+  // Nota: ya no existe estado "eliminado"
 
   return {
     uid: docUsuario.id,
@@ -114,7 +110,6 @@ export async function olvidePassword(correo) {
 }
 
 // ---------- CREAR ADMIN (app secundaria) ----------
-// auth.js - función crearAdministrador actualizada
 export async function crearAdministrador(correo, nombre, cedula, password) {
   let secondaryApp;
   if (!getApps().some(app => app.name === "Secondary")) {
@@ -197,74 +192,29 @@ window.registrar = async () => {
   if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
   try {
+    // Verificar si la cédula ya está registrada
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
-
     if (!cedulaSnapshot.empty) {
-      const docExistente = cedulaSnapshot.docs[0];
-      const data = docExistente.data();
-      
-      if (data.estado === "eliminado") {
-        // Verificar que el correo también coincida con el registrado
-        if (data.correo !== correo) {
-          await mostrarAlerta("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.", "error");
-          return;
-        }
-        // Reactivar cuenta eliminada
-        await updateDoc(doc(db, "usuarios", docExistente.id), {
-          nombre,
-          materia,
-          estado: "pendiente",
-          fecha: new Date()
-        });
-        await sendPasswordResetEmail(auth, data.correo);
-        await mostrarAlerta("Tu cuenta estaba eliminada. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
-        window.location.href = "aula.html";
-        return;
-      } else {
-        await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
-        return;
-      }
+      await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
+      return;
     }
-    
-        // 2. Verificar si el correo ya existe
+
+    // Verificar si el correo ya está registrado
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
-
     if (!correoSnapshot.empty) {
-      const docExistente = correoSnapshot.docs[0];
-      const data = docExistente.data();
-      
-      if (data.estado === "eliminado") {
-        // Verificar que la cédula también coincida con la registrada
-        if (data.cedula !== cedula) {
-          await mostrarAlerta("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.", "error");
-          return;
-        }
-        // Reactivar cuenta eliminada (ya se actualizó en el paso anterior o se actualiza aquí)
-        await updateDoc(doc(db, "usuarios", docExistente.id), {
-          nombre,
-          materia,
-          estado: "pendiente",
-          fecha: new Date()
-        });
-        await sendPasswordResetEmail(auth, data.correo);
-        await mostrarAlerta("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
-        window.location.href = "aula.html";
-        return;
-      } else {
-        await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
-        return;
-      }
+      await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
+      return;
     }
-    
-    // 3. Si no hay conflictos, crear nuevo usuario
+
+    // Crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
     await mostrarAlerta("Solicitud enviada al administrador", "success");
     window.location.href = "aula.html";
     
   } catch (e) {
-   await mostrarAlerta("Error: " + e.message, "error");
+    await mostrarAlerta("Error: " + e.message, "error");
   }
 };
 
@@ -281,7 +231,7 @@ window.olvidePassword = async () => {
   }
 
   try {
-    // 1. Verificar si el correo existe en Firestore
+    // Verificar si el correo existe en Firestore
     const q = query(collection(db, "usuarios"), where("correo", "==", correo));
     const querySnapshot = await getDocs(q);
     
@@ -290,21 +240,16 @@ window.olvidePassword = async () => {
       return;
     }
 
-    // 2. Verificar que el usuario no esté eliminado o inactivo
+    // Verificar que la cuenta no esté inactiva 
     const docUsuario = querySnapshot.docs[0];
     const data = docUsuario.data();
-    
-    if (data.estado === "eliminado") {
-      await mostrarAlerta("Esta cuenta ha sido eliminada. Contacte al administrador.", "info");
-      return;
-    }
     
     if (data.estado === "inactivo") {
       await mostrarAlerta("Esta cuenta está inactiva. Contacte al administrador.", "info");
       return;
     }
 
-    // 3. Enviar correo de restablecimiento
+    // Enviar correo de restablecimiento
     await sendPasswordResetEmail(auth, correo);
     await mostrarAlerta("Se ha enviado un enlace de restablecimiento a su correo.", "info");
     window.location.href = "aula.html";

@@ -1,6 +1,6 @@
 // js/profesor.js
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
-import { auth, db, storage } from './firebase-init.js';
+import { auth, db } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { updatePassword, updateEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+
 let currentUser = null;
 let seccionActualId = null;
 
@@ -17,7 +18,6 @@ async function init() {
     const { user, data } = await protegerPagina(['admin', 'profesor']);
     currentUser = user;
     
-    // Mostrar botón de admin si corresponde
     if (data.rol === 'admin') {
         const btnAdmin = document.getElementById('btnAdminPanel');
         if (btnAdmin) btnAdmin.style.display = 'block';
@@ -29,7 +29,6 @@ async function init() {
   } catch (e) {}
 }
 
-// Función global para redirigir al panel admin
 window.irAAdmin = function() {
     window.location.href = 'admin.html';
 };
@@ -38,7 +37,6 @@ async function cargarDatosProfesor(data) {
   const nombreSpan = document.getElementById("nombreProfesor");
   if (nombreSpan) nombreSpan.innerText = data.nombre;
   
-  // Rellenar formulario de edición si existe
   const nombreInput = document.getElementById("nombre");
   const cedulaInput = document.getElementById("cedula");
   const materiaInput = document.getElementById("materia");
@@ -68,7 +66,7 @@ window.mostrarSecciones = function() {
   document.getElementById("sidebar")?.classList.remove("active");
 };
 
-// ---------- PERFIL (con confirmación de contraseña) ----------
+// ---------- PERFIL ----------
 window.guardarPerfil = async function() {
   const nombreInput = document.getElementById("nombre");
   const cedulaInput = document.getElementById("cedula");
@@ -94,10 +92,9 @@ window.guardarPerfil = async function() {
     return;
   }
 
-  // Validar contraseña si se intenta cambiar
   if (password || confirm) {
     if (password !== confirm) {
-      aawait mostrarAlerta("Las contraseñas no coinciden", "error");
+      await mostrarAlerta("Las contraseñas no coinciden", "error");
       return;
     }
     if (password.length < 6) {
@@ -107,15 +104,12 @@ window.guardarPerfil = async function() {
   }
 
   try {
-    // Obtener datos actuales para comparar el correo
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) throw new Error("Perfil no encontrado");
     const currentData = userDoc.data();
     const correoActual = currentData.correo;
 
-    // Si el correo cambió, verificar que no esté en uso y actualizar en Auth
     if (nuevoCorreo !== correoActual) {
-      // Verificar si el nuevo correo ya existe en otro usuario
       const correoQuery = query(collection(db, "usuarios"), where("correo", "==", nuevoCorreo));
       const correoSnapshot = await getDocs(correoQuery);
       if (!correoSnapshot.empty) {
@@ -126,13 +120,10 @@ window.guardarPerfil = async function() {
         }
       }
 
-      // Actualizar email en Firebase Auth
       await updateEmail(currentUser, nuevoCorreo);
-      // Enviar verificación al nuevo correo (opcional pero recomendado)
       await sendEmailVerification(currentUser);
     }
 
-    // Actualizar datos en Firestore
     await updateDoc(doc(db, "usuarios", currentUser.uid), {
       nombre,
       cedula,
@@ -140,14 +131,12 @@ window.guardarPerfil = async function() {
       correo: nuevoCorreo
     });
 
-    // Actualizar contraseña si se proporcionó
     if (password) {
       await updatePassword(currentUser, password);
     }
 
-    await mostrarAlerta("Perfil actualizado correctamente" + (nuevoCorreo !== correoActual ? " - Se ha enviado un correo de verificación a la nueva dirección." : ""), "succes");
+    await mostrarAlerta("Perfil actualizado correctamente" + (nuevoCorreo !== correoActual ? " - Se ha enviado un correo de verificación a la nueva dirección." : ""), "success");
     
-    // Limpiar campos de contraseña
     if (passwordInput) passwordInput.value = "";
     if (confirmInput) confirmInput.value = "";
 
@@ -172,7 +161,6 @@ window.crearSeccion = async function() {
   const nombreSeccion = document.getElementById("nombreSeccion")?.value;
   if (!nombreSeccion) return await mostrarAlerta("Ingrese el nombre de la sección", "error");
 
-  // Verificar que el profesor tenga materia registrada
   try {
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) {
@@ -184,7 +172,7 @@ window.crearSeccion = async function() {
     const materia = profesorData.materia?.trim();
     
     if (!materia) {
-      aawait mostrarAlerta("Debe completar el campo 'Materia' en su perfil antes de crear secciones. Vaya a 'Editar Perfil' para agregarlo.", "error");
+      await mostrarAlerta("Debe completar el campo 'Materia' en su perfil antes de crear secciones. Vaya a 'Editar Perfil' para agregarlo.", "error");
       return;
     }
   } catch (error) {
@@ -193,7 +181,6 @@ window.crearSeccion = async function() {
     return;
   }
 
-  // Crear la sección
   await addDoc(collection(db, "secciones"), {
     nombre: nombreSeccion,
     profesor: currentUser.uid,
@@ -203,7 +190,6 @@ window.crearSeccion = async function() {
   document.getElementById("nombreSeccion").value = "";
   await cargarSecciones();
 };
-
 
 async function cargarSecciones() {
   const lista = document.getElementById("listaSecciones");
@@ -224,12 +210,10 @@ async function cargarSecciones() {
       </button>
     `;
     
-    // Click en el nombre abre la sección
     tarjeta.querySelector('.nombre-seccion').addEventListener('click', () => {
       abrirSeccion(doc.id, data.nombre);
     });
     
-    // Click en el botón elimina (detiene propagación)
     tarjeta.querySelector('.btn-eliminar-seccion').addEventListener('click', (e) => {
       e.stopPropagation();
       eliminarSeccion(doc.id, data.nombre);
@@ -250,51 +234,44 @@ window.abrirSeccion = function(id, nombre) {
   cargarArchivos();
 };
 
-//----------ELIMINAR SECCION-----
+// ---------- ELIMINAR SECCIÓN ----------
 async function eliminarSeccion(id, nombre) {
   const confirmado = await mostrarConfirmacion(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`, 'Confirmar eliminación');
   if (!confirmado) return;
 
   try {
-    // 1. Obtener todos los archivos de esta sección
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
     
     const archivos = archivosSnapshot.docs;
     let eliminados = 0;
     
-    // 2. Recorrer cada archivo y eliminarlo con la función probada
     for (const archivoDoc of archivos) {
       const archivoData = archivoDoc.data();
       const nombreArchivo = archivoData.nombre;
       const publicId = archivoData.publicId;
       
       if (!publicId) {
-        // Si no tiene publicId, al menos lo borramos de Firestore
         await deleteDoc(doc(db, "archivos", archivoDoc.id));
         eliminados++;
         continue;
       }
       
       try {
-        // Llamar a una versión sin alertas de eliminarArchivo
         await eliminarArchivoSilencioso(archivoDoc.id, nombreArchivo, publicId);
         eliminados++;
       } catch (error) {
-        // Si falla, detener todo y mostrar error
         console.error(`Error al eliminar "${nombreArchivo}":`, error);
         await mostrarAlerta(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`, "error");
-        return; // ← Detiene la ejecución, la sección NO se borra
+        return;
       }
     }
     
-    // 3. Si todos los archivos se eliminaron, borrar la sección
     await deleteDoc(doc(db, "secciones", id));
     
-    await mostrarAlerta(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`, "error");
+    await mostrarAlerta(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`, "success");
     await cargarSecciones();
     
-    // Ocultar vista de archivos si estábamos dentro de la sección eliminada
     if (seccionActualId === id) {
       document.getElementById("archivos")?.classList.add("oculto");
       document.getElementById("secciones")?.classList.remove("oculto");
@@ -306,9 +283,6 @@ async function eliminarSeccion(id, nombre) {
   }
 }
 
-// ----------------------------------------------
-// Función auxiliar: igual que eliminarArchivo pero sin alert/confirm
-// ----------------------------------------------
 async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
   const idToken = await auth.currentUser.getIdToken();
   
@@ -329,12 +303,11 @@ async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
     throw new Error(errorData.error || 'Error al eliminar de Cloudinary');
   }
 
-  // Eliminar de Firestore
   await deleteDoc(doc(db, "archivos", idFirestore));
-  // No muestra alertas
 }
+
 // ---------- ARCHIVOS ----------
-window.seleccionarYSubirArchivo = function() {
+window.seleccionarYSubirArchivo = async function() {
     if (!seccionActualId) {
         await mostrarAlerta("No hay sección seleccionada", "error");
         return;
@@ -347,9 +320,8 @@ window.seleccionarYSubirArchivo = function() {
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
         maxFileSize: 15000000,
-        resourceType: 'auto',           // Detecta automáticamente imagen/raw
-        type: 'upload',                 // Fuerza que el recurso sea público
-        // No incluyas overwrite, publicId, use_filename ni signing
+        resourceType: 'auto',
+        type: 'upload',
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
@@ -358,7 +330,6 @@ window.seleccionarYSubirArchivo = function() {
         }
         
         if (result && result.event === "success") {
-            console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
                 result.info.original_filename,
                 result.info.secure_url,
@@ -370,7 +341,6 @@ window.seleccionarYSubirArchivo = function() {
     widget.open();
 };
 
-// GUARDAR METADATOS EN FIRESTORE
 async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
     try {
         await addDoc(collection(db, "archivos"), {
@@ -378,7 +348,7 @@ async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
             url: urlArchivo,
             seccion: seccionActualId,
             fecha: new Date(),
-            publicId: publicId      // <-- Indispensable para eliminar después
+            publicId: publicId
         });
         await cargarArchivos();
         await mostrarAlerta("Archivo subido correctamente", "success");
@@ -416,13 +386,11 @@ async function cargarArchivos() {
     });
 }
 
-//Eliminar archivos
 async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
   const confirmado = await mostrarConfirmacion(`¿Eliminar el archivo "${nombreArchivo}"?`, 'Confirmar eliminación');
   if (!confirmado) return;
 
   try {
-    // Obtener token de autenticación actual
     const idToken = await auth.currentUser.getIdToken();
     
     const response = await fetch(
@@ -442,7 +410,6 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
       throw new Error(errorData.error || 'Error al eliminar');
     }
 
-    // Eliminar de Firestore
     await deleteDoc(doc(db, "archivos", idFirestore));
     
     await mostrarAlerta("Archivo eliminado correctamente", "success");
@@ -451,12 +418,13 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
     await mostrarAlerta("No se pudo eliminar el archivo.", "error");
   }
 }
-window.cargarArchivos = cargarArchivos;
 
-window.addEventListener('DOMContentLoaded', init);
+window.cargarArchivos = cargarArchivos;
 
 window.volverASecciones = function() {
     document.getElementById("archivos")?.classList.add("oculto");
     document.getElementById("secciones")?.classList.remove("oculto");
     seccionActualId = null;
 };
+
+window.addEventListener('DOMContentLoaded', init);
