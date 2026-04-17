@@ -6,7 +6,7 @@ import { setupPasswordToggles } from './common.js';
 import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
 let seccionActualId = null;
