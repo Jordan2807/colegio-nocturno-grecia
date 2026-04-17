@@ -265,13 +265,9 @@ window.seleccionarYSubirArchivo = function() {
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        maxFileSize: 15000000,
-        publicId: (file) => {
-            const base = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-            const random = Math.random().toString(36).substring(2, 8);
-            return `${base}_${random}`;
-        },
-        overwrite: false
+        use_filename: true,        // Usa el nombre original del archivo como base
+        unique_filename: true,     // Añade sufijo aleatorio automáticamente
+        // No definimos 'publicId' manualmente para evitar conflictos
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
