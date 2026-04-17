@@ -81,6 +81,7 @@ async function cargarUsuarios() {
 
 function crearTarjetaAdmin(id, data) {
   const estado = data.estado || 'activo';
+  const estadoFormateado = estado.charAt(0).toUpperCase() + estado.slice(1);
   // Mostrar botones según estado
   const botones = [];
   if (estado !== 'activo') {
@@ -98,7 +99,7 @@ function crearTarjetaAdmin(id, data) {
         <div class="dato"><label>Nombre</label><span>${data.nombre || '—'}</span></div>
         <div class="dato"><label>Cédula</label><span>${data.cedula || '—'}</span></div>
         <div class="dato"><label>Correo</label><span>${data.correo}</span></div>
-        <div class="dato"><label>Estado</label><span>${estado}</span></div>
+        <div class="dato"><label>Estado</label><span>${estadoFormateado}</span></div>
       </div>
       <div class="usuario-botones">
         ${botones.join('')}
