@@ -267,15 +267,13 @@ window.seleccionarYSubirArchivo = function() {
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
         maxFileSize: 15000000,
-        // Generar publicId único: nombre_original_XXXXXX
         publicId: (file) => {
-            // Eliminar extensión y caracteres no seguros
-            const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-            // Generar sufijo aleatorio de 6 caracteres
-            const randomSuffix = Math.random().toString(36).substring(2, 8);
-            return `${baseName}_${randomSuffix}`;
-        },
-        overwrite: false   // No sobrescribir si ya existe (redundante con el sufijo aleatorio)
+            // Limpiar nombre original y agregar sufijo único
+            const base = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+            const random = Math.random().toString(36).substring(2, 8);
+            return `${base}_${random}`;
+        }
+        // ELIMINA overwrite: false
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
@@ -286,8 +284,8 @@ window.seleccionarYSubirArchivo = function() {
         if (result && result.event === "success") {
             console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
-                result.info.original_filename,
-                result.info.secure_url,
+                result.info.original_filename, 
+                result.info.secure_url, 
                 result.info.public_id
             );
         }
