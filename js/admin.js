@@ -3,9 +3,12 @@ import { auth, db } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
 import { setupPasswordToggles } from './common.js';
 import {
-  collection, getDocs, doc, updateDoc
+  collection, getDocs, doc, updateDoc, query, where   // ← Agregar query y where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { crearAdministrador } from './auth.js';
+
+// Importar sendPasswordResetEmail desde Auth
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let usuarioActual = null;
 
