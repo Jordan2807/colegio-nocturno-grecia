@@ -67,3 +67,33 @@ exports.eliminarArchivoCloudinary = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+exports.eliminarUsuarioAuth = functions.https.onCall(async (data, context) => {
+  // Verificar autenticación
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+  }
+
+  // Verificar que el llamador sea administrador
+  const callerUid = context.auth.uid;
+  const callerDoc = await admin.firestore().collection('usuarios').doc(callerUid).get();
+  if (!callerDoc.exists || callerDoc.data().rol !== 'admin') {
+    throw new functions.https.HttpsError('permission-denied', 'Solo administradores pueden eliminar usuarios.');
+  }
+
+  const { uid } = data;
+  if (!uid) {
+    throw new functions.https.HttpsError('invalid-argument', 'Se requiere el UID del usuario.');
+  }
+
+  try {
+    await admin.auth().deleteUser(uid);
+    return { success: true };
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      return { success: true, message: 'El usuario ya no existía en Auth' };
+    }
+    console.error('Error al eliminar usuario de Auth:', error);
+    throw new functions.https.HttpsError('internal', 'No se pudo eliminar el usuario de autenticación.');
+  }
+});
