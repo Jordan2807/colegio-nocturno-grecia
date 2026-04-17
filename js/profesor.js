@@ -6,7 +6,7 @@ import { setupPasswordToggles } from './common.js';
 import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { updatePassword, updateEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
 let seccionActualId = null;
@@ -42,9 +42,11 @@ async function cargarDatosProfesor(data) {
   const nombreInput = document.getElementById("nombre");
   const cedulaInput = document.getElementById("cedula");
   const materiaInput = document.getElementById("materia");
+  const correoInput = document.getElementById("correo");
   if (nombreInput) nombreInput.value = data.nombre || '';
   if (cedulaInput) cedulaInput.value = data.cedula || '';
   if (materiaInput) materiaInput.value = data.materia || '';
+  if (correoInput) correoInput.value = data.correo || '';
 }
 
 // ---------- MENÚ LATERAL ----------
@@ -71,6 +73,7 @@ window.guardarPerfil = async function() {
   const nombreInput = document.getElementById("nombre");
   const cedulaInput = document.getElementById("cedula");
   const materiaInput = document.getElementById("materia");
+  const correoInput = document.getElementById("correo");
   const passwordInput = document.getElementById("password");
   const confirmInput = document.getElementById("confirmPassword");
 
@@ -82,14 +85,16 @@ window.guardarPerfil = async function() {
   const nombre = nombreInput?.value.trim();
   const cedula = cedulaInput?.value.trim();
   const materia = materiaInput?.value.trim();
+  const nuevoCorreo = correoInput?.value.trim();
   const password = passwordInput?.value;
   const confirm = confirmInput?.value;
 
-  if (!nombre || !cedula || !materia) {
-    alert("Nombre, cédula y materia son obligatorios");
+  if (!nombre || !cedula || !materia || !nuevoCorreo) {
+    alert("Nombre, cédula, materia y correo son obligatorios");
     return;
   }
 
+  // Validar contraseña si se intenta cambiar
   if (password || confirm) {
     if (password !== confirm) {
       alert("Las contraseñas no coinciden");
@@ -102,24 +107,59 @@ window.guardarPerfil = async function() {
   }
 
   try {
+    // Obtener datos actuales para comparar el correo
+    const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
+    if (!userDoc.exists()) throw new Error("Perfil no encontrado");
+    const currentData = userDoc.data();
+    const correoActual = currentData.correo;
+
+    // Si el correo cambió, verificar que no esté en uso y actualizar en Auth
+    if (nuevoCorreo !== correoActual) {
+      // Verificar si el nuevo correo ya existe en otro usuario
+      const correoQuery = query(collection(db, "usuarios"), where("correo", "==", nuevoCorreo));
+      const correoSnapshot = await getDocs(correoQuery);
+      if (!correoSnapshot.empty) {
+        const otroDoc = correoSnapshot.docs[0];
+        if (otroDoc.id !== currentUser.uid) {
+          alert("El correo ingresado ya está en uso por otra cuenta.");
+          return;
+        }
+      }
+
+      // Actualizar email en Firebase Auth
+      await updateEmail(currentUser, nuevoCorreo);
+      // Enviar verificación al nuevo correo (opcional pero recomendado)
+      await sendEmailVerification(currentUser);
+    }
+
+    // Actualizar datos en Firestore
     await updateDoc(doc(db, "usuarios", currentUser.uid), {
       nombre,
       cedula,
-      materia
+      materia,
+      correo: nuevoCorreo
     });
 
+    // Actualizar contraseña si se proporcionó
     if (password) {
       await updatePassword(currentUser, password);
     }
 
-    alert("Perfil actualizado correctamente");
-    passwordInput.value = "";
-    confirmInput.value = "";
+    alert("Perfil actualizado correctamente" + (nuevoCorreo !== correoActual ? " - Se ha enviado un correo de verificación a la nueva dirección." : ""));
+    
+    // Limpiar campos de contraseña
+    if (passwordInput) passwordInput.value = "";
+    if (confirmInput) confirmInput.value = "";
+
   } catch (error) {
     console.error("Error al guardar perfil:", error);
     let mensaje = "Error al guardar los cambios";
     if (error.code === "auth/requires-recent-login") {
-      mensaje = "Por seguridad, vuelve a iniciar sesión para cambiar la contraseña";
+      mensaje = "Por seguridad, debes volver a iniciar sesión antes de cambiar el correo o la contraseña.";
+    } else if (error.code === "auth/email-already-in-use") {
+      mensaje = "El correo electrónico ya está en uso por otra cuenta.";
+    } else if (error.code === "auth/invalid-email") {
+      mensaje = "El formato del correo no es válido.";
     } else if (error.message) {
       mensaje = error.message;
     }
