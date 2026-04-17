@@ -262,20 +262,24 @@ footer {
 .mapa-seccion {
     padding: 40px 20px;
     text-align: center;
-    max-height: 450px;
-    aspect-ratio: 16 / 9; 
+    overflow: hidden; /* Evita desbordamientos */
 }
 
 .mapa-container {
+    position: relative;
+    width: 100%;
     max-width: 1000px;
-    margin: auto;
+    margin: 0 auto;
     border-radius: 10px;
-    overflow: hidden;
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    aspect-ratio: 16 / 9; 
+    /* Relación de aspecto 16:9 (puedes cambiarla a 4:3 si prefieres) */
+    aspect-ratio: 16 / 9;
 }
 
 .mapa-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border: 0;
@@ -1072,6 +1076,13 @@ footer {
 
     .tarjeta {
         padding: 20px 15px;
+    }
+
+    .mapa-seccion {
+        padding: 20px 10px;
+    }
+    .mapa-container {
+        aspect-ratio: 4 / 3; /* Más alto en móviles si se prefiere */
     }
 
     .archivo-item {
