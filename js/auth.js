@@ -1,8 +1,6 @@
-//js/utils.js
-import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
-
 // js/auth.js
 import { auth, db, firebaseConfig } from './firebase-init.js';
+import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
 
 // Importaciones de App (para crear instancia secundaria)
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -251,7 +249,7 @@ window.registrar = async () => {
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        aawait mostrarAlerta("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
+        await mostrarAlerta("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
         window.location.href = "aula.html";
         return;
       } else {

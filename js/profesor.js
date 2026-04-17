@@ -1,6 +1,3 @@
-//js/utils.js
-import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
-
 // js/profesor.js
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
 import { auth, db, storage } from './firebase-init.js';
@@ -10,7 +7,7 @@ import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { updatePassword, updateEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
 let currentUser = null;
 let seccionActualId = null;
 
