@@ -1,3 +1,6 @@
+//js/utils.js
+import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+
 // js/auth.js
 import { auth, db, firebaseConfig } from './firebase-init.js';
 
@@ -143,7 +146,7 @@ window.login = async () => {
   const passwordInput = document.getElementById("password");
 
   if (!cedulaInput || !passwordInput) {
-    alert("Error: campos de formulario no disponibles");
+    await mostrarAlerta("Error: campos de formulario no disponibles", "error");
     return;
   }
 
@@ -151,7 +154,7 @@ window.login = async () => {
   const password = passwordInput.value;
 
   if (!cedula || !password) {
-    alert("Ingrese cédula y contraseña");
+    await mostrarAlerta("Ingrese cédula y contraseña", "error");
     return;
   }
 
@@ -166,7 +169,7 @@ window.login = async () => {
       window.location.href = "aula.html";
     }
   } catch (error) {
-    alert(error.message);
+    await mostrarAlerta(error.message, "error");
   }
 };
 
@@ -179,7 +182,7 @@ window.registrar = async () => {
   const confirmInput = document.getElementById("confirmPassword");
 
   if (!nombreInput || !cedulaInput || !materiaInput || !correoInput || !passwordInput || !confirmInput) {
-    return alert("Error: No se encontraron todos los campos del formulario");
+    return await mostrarAlerta("Error: No se encontraron todos los campos del formulario", "error");
   }
 
   const nombre = nombreInput.value.trim();
@@ -190,10 +193,10 @@ window.registrar = async () => {
   const confirm = confirmInput.value;
 
   if (!nombre || !cedula || !materia || !correo || !password || !confirm) {
-    return alert("Todos los campos son obligatorios");
+    return await mostrarAlerta("Todos los campos son obligatorios", "error");
   }
-  if (password !== confirm) return alert("Las contraseñas no coinciden");
-  if (password.length < 6) return alert("Contraseña muy débil");
+  if (password !== confirm) return await mostrarAlerta("Las contraseñas no coinciden", "error");
+  if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
   try {
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
@@ -206,7 +209,7 @@ window.registrar = async () => {
       if (data.estado === "eliminado") {
         // Verificar que el correo también coincida con el registrado
         if (data.correo !== correo) {
-          alert("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.");
+          await mostrarAlerta("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.", "error");
           return;
         }
         // Reactivar cuenta eliminada
@@ -217,11 +220,11 @@ window.registrar = async () => {
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        alert("Tu cuenta estaba eliminada. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.");
+        await mostrarAlerta("Tu cuenta estaba eliminada. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
         window.location.href = "aula.html";
         return;
       } else {
-        alert("La cédula ingresada ya está registrada en el sistema.");
+        await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
         return;
       }
     }
@@ -237,7 +240,7 @@ window.registrar = async () => {
       if (data.estado === "eliminado") {
         // Verificar que la cédula también coincida con la registrada
         if (data.cedula !== cedula) {
-          alert("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.");
+          await mostrarAlerta("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.", "error");
           return;
         }
         // Reactivar cuenta eliminada (ya se actualizó en el paso anterior o se actualiza aquí)
@@ -248,22 +251,22 @@ window.registrar = async () => {
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        alert("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.");
+        aawait mostrarAlerta("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.", "info");
         window.location.href = "aula.html";
         return;
       } else {
-        alert("El correo electrónico ya está en uso por otra cuenta.");
+        await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
         return;
       }
     }
     
     // 3. Si no hay conflictos, crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
-    alert("Solicitud enviada al administrador");
+    await mostrarAlerta("Solicitud enviada al administrador", "success");
     window.location.href = "aula.html";
     
   } catch (e) {
-    alert("Error: " + e.message);
+   await mostrarAlerta("Error: " + e.message, "error");
   }
 };
 
@@ -275,7 +278,7 @@ window.olvidePassword = async () => {
   
   const correo = correoInput.value.trim();
   if (!correo) {
-    alert("Ingrese su correo electrónico");
+    await mostrarAlerta("Ingrese su correo electrónico", "error");
     return;
   }
 
@@ -285,7 +288,7 @@ window.olvidePassword = async () => {
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
-      alert("El correo ingresado no está registrado en el sistema.");
+      await mostrarAlerta("El correo ingresado no está registrado en el sistema.", "error");
       return;
     }
 
@@ -294,23 +297,23 @@ window.olvidePassword = async () => {
     const data = docUsuario.data();
     
     if (data.estado === "eliminado") {
-      alert("Esta cuenta ha sido eliminada. Contacte al administrador.");
+      await mostrarAlerta("Esta cuenta ha sido eliminada. Contacte al administrador.", "info");
       return;
     }
     
     if (data.estado === "inactivo") {
-      alert("Esta cuenta está inactiva. Contacte al administrador.");
+      await mostrarAlerta("Esta cuenta está inactiva. Contacte al administrador.", "info");
       return;
     }
 
     // 3. Enviar correo de restablecimiento
     await sendPasswordResetEmail(auth, correo);
-    alert("Se ha enviado un enlace de restablecimiento a su correo.");
+    await mostrarAlerta("Se ha enviado un enlace de restablecimiento a su correo.", "info");
     window.location.href = "aula.html";
     
   } catch (error) {
     console.error("Error al procesar solicitud:", error);
-    alert("Ocurrió un error. Intente de nuevo más tarde.");
+    await mostrarAlerta("Ocurrió un error. Intente de nuevo más tarde.", "error");
   }
 };
 

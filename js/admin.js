@@ -1,3 +1,6 @@
+//js/utils.js
+import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+
 // js/admin.js
 import { auth, db } from './firebase-init.js';
 import { protegerPagina } from './auth.js';
@@ -159,24 +162,24 @@ document.addEventListener('click', async (e) => {
   
   if (accion === 'activar') {
     await cambiarEstado(id, 'activo');
-    alert('Usuario activado');
+    await mostrarAlerta('Usuario activado', 'success');
   } else if (accion === 'inactivar') {
     await cambiarEstado(id, 'inactivo');
-    alert('Usuario inactivado');
+    await mostrarAlerta('Usuario inactivado', 'warning');
   } else if (accion === 'eliminar') {
-    if (confirm('¿Eliminar usuario?')) {
+    if (await mostrarConfirmacion('¿Eliminar usuario?', 'Confirmar')) {
       await cambiarEstado(id, 'eliminado');
-      alert('Usuario eliminado');
+      await mostrarAlerta('Usuario eliminado', 'warning');
     }
   } else if (accion === 'hacerAdmin') {
-    if (confirm('¿Convertir este profesor en administrador?')) {
+    if (await mostrarConfirmacion('¿Convertir este profesor en administrador?', 'Confirmar')) {
       await cambiarRol(id, 'admin');
-      alert('Ahora es administrador');
+      await mostrarAlerta('Ahora es administrador', 'success');
     }
   } else if (accion === 'hacerProfesor') {
-    if (confirm('¿Convertir este administrador en profesor?')) {
+    if (await mostrarConfirmacion('¿Convertir este administrador en profesor?', 'Confirmar')) {
       await cambiarRol(id, 'profesor');
-      alert('Ahora es profesor');
+      await mostrarAlerta('Ahora es profesor', 'success');
     }
   }
 });
@@ -189,10 +192,10 @@ window.registrarAdmin = async function() {
   const confirm = document.getElementById("confirmPassword")?.value;
 
   if (!correo || !nombre || !cedula || !password || !confirm) {
-    return alert("Todos los campos son obligatorios");
+    return await mostrarAlerta("Todos los campos son obligatorios", "error");
   }
-  if (password !== confirm) return alert("Las contraseñas no coinciden");
-  if (password.length < 6) return alert("Contraseña muy débil");
+  if (password !== confirm) return await mostrarAlerta("Las contraseñas no coinciden", "error");
+  if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
   try {
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
@@ -205,7 +208,7 @@ window.registrarAdmin = async function() {
       if (data.estado === "eliminado") {
         // Verificar que el correo coincida con el registrado
         if (data.correo !== correo) {
-          alert("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.");
+          await mostrarAlerta("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.", "error");
           return;
         }
         // Reactivar cuenta eliminada actualizando a admin
@@ -217,13 +220,13 @@ window.registrarAdmin = async function() {
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        alert("La cédula pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.");
+        await mostrarAlerta("La cédula pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.", "info");
         document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
         limpiarFormularioAdmin();
         await cargarUsuarios();
         return;
       } else {
-        alert("La cédula ingresada ya está registrada en el sistema.");
+        await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
         return;
       }
     }
@@ -239,7 +242,7 @@ window.registrarAdmin = async function() {
       if (data.estado === "eliminado") {
         // Verificar que la cédula coincida con la registrada
         if (data.cedula !== cedula) {
-          alert("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.");
+          await mostrarAlerta("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.", "error");
           return;
         }
         // Reactivar cuenta eliminada actualizando a admin
@@ -251,25 +254,25 @@ window.registrarAdmin = async function() {
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        alert("El correo pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.");
+        await mostrarAlerta("El correo pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.", "info");
         document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
         limpiarFormularioAdmin();
         await cargarUsuarios();
         return;
       } else {
-        alert("El correo electrónico ya está en uso por otra cuenta.");
+        await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
         return;
       }
     }
     
     // 3. Si no hay conflictos, crear nuevo administrador
     await crearAdministrador(correo, nombre, cedula, password);
-    alert("Administrador creado correctamente");
+    await mostrarAlerta("Administrador creado correctamente", "success");
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
     limpiarFormularioAdmin();
     await cargarUsuarios();
   } catch (e) {
-    alert("Error: " + e.message);
+    await mostrarAlerta("Error: " + e.message, "error");
   }
 };
 
