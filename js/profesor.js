@@ -214,47 +214,43 @@ window.abrirSeccion = function(id, nombre) {
 async function eliminarSeccion(id, nombre) {
   if (!confirm(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`)) return;
 
-  const functions = getFunctions();
-  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
-
   try {
     // 1. Obtener todos los archivos de esta sección
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
     
-    // 2. Eliminar cada archivo de Cloudinary y Firestore
-    const errores = [];
+    const archivos = archivosSnapshot.docs;
+    let eliminados = 0;
     
-    for (const archivoDoc of archivosSnapshot.docs) {
+    // 2. Recorrer cada archivo y eliminarlo con la función probada
+    for (const archivoDoc of archivos) {
       const archivoData = archivoDoc.data();
+      const nombreArchivo = archivoData.nombre;
       const publicId = archivoData.publicId;
       
       if (!publicId) {
-        console.warn("Archivo sin publicId, se omite:", archivoData.nombre);
+        // Si no tiene publicId, al menos lo borramos de Firestore
+        await deleteDoc(doc(db, "archivos", archivoDoc.id));
+        eliminados++;
         continue;
       }
       
       try {
-        // Intentar eliminar de Cloudinary
-        await eliminarDeCloudinary({ publicId });
-        // Si tiene éxito, eliminar de Firestore
-        await deleteDoc(doc(db, "archivos", archivoDoc.id));
+        // Llamar a una versión sin alertas de eliminarArchivo
+        await eliminarArchivoSilencioso(archivoDoc.id, nombreArchivo, publicId);
+        eliminados++;
       } catch (error) {
-        console.error(`Error al eliminar archivo ${archivoData.nombre}:`, error);
-        errores.push(archivoData.nombre);
+        // Si falla, detener todo y mostrar error
+        console.error(`Error al eliminar "${nombreArchivo}":`, error);
+        alert(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`);
+        return; // ← Detiene la ejecución, la sección NO se borra
       }
     }
     
-    // 3. Si hubo errores, NO eliminar la sección y notificar
-    if (errores.length > 0) {
-      alert(`No se pudo eliminar la sección porque falló la eliminación de los siguientes archivos:\n- ${errores.join('\n- ')}\n\nIntenta de nuevo más tarde.`);
-      return;
-    }
-    
-    // 4. Si todos los archivos se eliminaron correctamente, borrar la sección
+    // 3. Si todos los archivos se eliminaron, borrar la sección
     await deleteDoc(doc(db, "secciones", id));
     
-    alert("Sección y archivos eliminados correctamente");
+    alert(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`);
     await cargarSecciones();
     
     // Ocultar vista de archivos si estábamos dentro de la sección eliminada
@@ -264,9 +260,37 @@ async function eliminarSeccion(id, nombre) {
       seccionActualId = null;
     }
   } catch (error) {
-    console.error("Error al procesar la eliminación de la sección:", error);
-    alert("Error inesperado al eliminar la sección. Intenta de nuevo.");
+    console.error("Error general al eliminar sección:", error);
+    alert("Error inesperado. Intenta de nuevo.");
   }
+}
+
+// ----------------------------------------------
+// Función auxiliar: igual que eliminarArchivo pero sin alert/confirm
+// ----------------------------------------------
+async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
+  const idToken = await auth.currentUser.getIdToken();
+  
+  const response = await fetch(
+    'https://us-central1-aula-virtual-colegio-f3290.cloudfunctions.net/eliminarArchivoCloudinary',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ publicId })
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Error al eliminar de Cloudinary');
+  }
+
+  // Eliminar de Firestore
+  await deleteDoc(doc(db, "archivos", idFirestore));
+  // No muestra alertas
 }
 // ---------- ARCHIVOS ----------
 window.seleccionarYSubirArchivo = function() {
