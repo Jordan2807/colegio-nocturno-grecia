@@ -6,7 +6,7 @@ import { setupPasswordToggles } from './common.js';
 import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
 let seccionActualId = null;
@@ -56,12 +56,14 @@ window.mostrarPerfil = function() {
   document.getElementById("perfil")?.classList.remove("oculto");
   document.getElementById("secciones")?.classList.add("oculto");
   document.getElementById("archivos")?.classList.add("oculto");
+  document.getElementById("sidebar")?.classList.remove("active");
 };
 
 window.mostrarSecciones = function() {
   document.getElementById("perfil")?.classList.add("oculto");
   document.getElementById("secciones")?.classList.remove("oculto");
   document.getElementById("archivos")?.classList.add("oculto");
+  document.getElementById("sidebar")?.classList.remove("active");
 };
 
 // ---------- PERFIL (con confirmación de contraseña) ----------
@@ -83,13 +85,11 @@ window.guardarPerfil = async function() {
   const password = passwordInput?.value;
   const confirm = confirmInput?.value;
 
-  // Validar campos obligatorios
   if (!nombre || !cedula || !materia) {
     alert("Nombre, cédula y materia son obligatorios");
     return;
   }
 
-  // Si se intenta cambiar la contraseña
   if (password || confirm) {
     if (password !== confirm) {
       alert("Las contraseñas no coinciden");
@@ -102,25 +102,21 @@ window.guardarPerfil = async function() {
   }
 
   try {
-    // Actualizar datos en Firestore
     await updateDoc(doc(db, "usuarios", currentUser.uid), {
       nombre,
       cedula,
       materia
     });
 
-    // Actualizar contraseña en Auth si se proporcionó
     if (password) {
       await updatePassword(currentUser, password);
     }
 
     alert("Perfil actualizado correctamente");
-
-    // Limpiar campos de contraseña por seguridad
-    if (passwordInput) passwordInput.value = "";
-    if (confirmInput) confirmInput.value = "";
-
+    passwordInput.value = "";
+    confirmInput.value = "";
   } catch (error) {
+    console.error("Error al guardar perfil:", error);
     let mensaje = "Error al guardar los cambios";
     if (error.code === "auth/requires-recent-login") {
       mensaje = "Por seguridad, vuelve a iniciar sesión para cambiar la contraseña";
@@ -218,28 +214,43 @@ window.abrirSeccion = function(id, nombre) {
 async function eliminarSeccion(id, nombre) {
   if (!confirm(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`)) return;
 
-  const functions = getFunctions();
-  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
-
   try {
-    // Obtener todos los archivos de esta sección
+    // 1. Obtener todos los archivos de esta sección
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
     
-    // Eliminar cada archivo de Cloudinary y Firestore en paralelo
-    const deletePromises = [];
-    archivosSnapshot.forEach((archivoDoc) => {
+    const archivos = archivosSnapshot.docs;
+    let eliminados = 0;
+    
+    // 2. Recorrer cada archivo y eliminarlo con la función probada
+    for (const archivoDoc of archivos) {
       const archivoData = archivoDoc.data();
-      deletePromises.push(eliminarDeCloudinary({ publicId: archivoData.publicId }));
-      deletePromises.push(deleteDoc(doc(db, "archivos", archivoDoc.id)));
-    });
+      const nombreArchivo = archivoData.nombre;
+      const publicId = archivoData.publicId;
+      
+      if (!publicId) {
+        // Si no tiene publicId, al menos lo borramos de Firestore
+        await deleteDoc(doc(db, "archivos", archivoDoc.id));
+        eliminados++;
+        continue;
+      }
+      
+      try {
+        // Llamar a una versión sin alertas de eliminarArchivo
+        await eliminarArchivoSilencioso(archivoDoc.id, nombreArchivo, publicId);
+        eliminados++;
+      } catch (error) {
+        // Si falla, detener todo y mostrar error
+        console.error(`Error al eliminar "${nombreArchivo}":`, error);
+        alert(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`);
+        return; // ← Detiene la ejecución, la sección NO se borra
+      }
+    }
     
-    await Promise.all(deletePromises);
-    
-    // Finalmente eliminar la sección
+    // 3. Si todos los archivos se eliminaron, borrar la sección
     await deleteDoc(doc(db, "secciones", id));
     
-    alert("Sección y archivos eliminados correctamente");
+    alert(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`);
     await cargarSecciones();
     
     // Ocultar vista de archivos si estábamos dentro de la sección eliminada
@@ -249,8 +260,37 @@ async function eliminarSeccion(id, nombre) {
       seccionActualId = null;
     }
   } catch (error) {
-    alert("Error al eliminar la sección. Intenta de nuevo.");
+    console.error("Error general al eliminar sección:", error);
+    alert("Error inesperado. Intenta de nuevo.");
   }
+}
+
+// ----------------------------------------------
+// Función auxiliar: igual que eliminarArchivo pero sin alert/confirm
+// ----------------------------------------------
+async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
+  const idToken = await auth.currentUser.getIdToken();
+  
+  const response = await fetch(
+    'https://us-central1-aula-virtual-colegio-f3290.cloudfunctions.net/eliminarArchivoCloudinary',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ publicId })
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Error al eliminar de Cloudinary');
+  }
+
+  // Eliminar de Firestore
+  await deleteDoc(doc(db, "archivos", idFirestore));
+  // No muestra alertas
 }
 // ---------- ARCHIVOS ----------
 window.seleccionarYSubirArchivo = function() {
@@ -260,22 +300,27 @@ window.seleccionarYSubirArchivo = function() {
     }
 
     const widget = window.cloudinary.createUploadWidget({
-        cloudName: 'dfsikzvkn',        // <-- Reemplaza con tu Cloud Name real
-        uploadPreset: 'preset_profesores', // <-- Reemplaza con tu Upload Preset real
+        cloudName: 'dfsikzvkn',
+        uploadPreset: 'preset_profesores',
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
         maxFileSize: 15000000,
+        resourceType: 'auto',           // Detecta automáticamente imagen/raw
+        type: 'upload',                 // Fuerza que el recurso sea público
+        // No incluyas overwrite, publicId, use_filename ni signing
     }, async (error, result) => {
         if (error) {
-            alert("Error al subir el archivo.");
+            console.error("Error en la subida:", error);
+            alert("Error al subir el archivo: " + (error.statusText || ''));
             return;
         }
         
         if (result && result.event === "success") {
+            console.log("Subida exitosa:", result.info);
             await guardarArchivoEnFirestore(
-                result.info.original_filename, 
-                result.info.secure_url, 
+                result.info.original_filename,
+                result.info.secure_url,
                 result.info.public_id
             );
         }
@@ -284,7 +329,7 @@ window.seleccionarYSubirArchivo = function() {
     widget.open();
 };
 
-// NUEVA FUNCIÓN AUXILIAR
+// GUARDAR METADATOS EN FIRESTORE
 async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
     try {
         await addDoc(collection(db, "archivos"), {

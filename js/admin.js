@@ -161,9 +161,9 @@ document.addEventListener('click', async (e) => {
 });
 
 window.registrarAdmin = async function() {
-  const correo = document.getElementById("correoAdmin")?.value;
-  const nombre = document.getElementById("nombreAdmin")?.value;
-  const cedula = document.getElementById("cedulaAdmin")?.value;
+  const correo = document.getElementById("correoAdmin")?.value.trim();
+  const nombre = document.getElementById("nombreAdmin")?.value.trim();
+  const cedula = document.getElementById("cedulaAdmin")?.value.trim();
   const password = document.getElementById("password")?.value;
   const confirm = document.getElementById("confirmPassword")?.value;
 
@@ -176,15 +176,12 @@ window.registrarAdmin = async function() {
   try {
     await crearAdministrador(correo, nombre, cedula, password);
     alert("Administrador creado correctamente");
-    
-    // Limpiar formulario
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
     document.getElementById("correoAdmin").value = "";
     document.getElementById("nombreAdmin").value = "";
     document.getElementById("cedulaAdmin").value = "";
     document.getElementById("password").value = "";
     document.getElementById("confirmPassword").value = "";
-    
     await cargarUsuarios();
   } catch (e) {
     alert("Error: " + e.message);
