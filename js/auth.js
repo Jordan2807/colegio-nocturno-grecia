@@ -196,20 +196,23 @@ window.registrar = async () => {
   if (password.length < 6) return alert("Contraseña muy débil");
 
   try {
-    // 1. Verificar si la cédula ya está registrada
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
-    
+
     if (!cedulaSnapshot.empty) {
       const docExistente = cedulaSnapshot.docs[0];
       const data = docExistente.data();
       
       if (data.estado === "eliminado") {
+        // Verificar que el correo también coincida con el registrado
+        if (data.correo !== correo) {
+          alert("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.");
+          return;
+        }
         // Reactivar cuenta eliminada
         await updateDoc(doc(db, "usuarios", docExistente.id), {
           nombre,
           materia,
-          correo,
           estado: "pendiente",
           fecha: new Date()
         });
@@ -218,28 +221,33 @@ window.registrar = async () => {
         window.location.href = "aula.html";
         return;
       } else {
-        // Cédula ya registrada y activa/pendiente/inactiva
         alert("La cédula ingresada ya está registrada en el sistema.");
         return;
       }
     }
     
-    // 2. Verificar si el correo ya existe (comportamiento original)
+        // 2. Verificar si el correo ya existe
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
-    
+
     if (!correoSnapshot.empty) {
       const docExistente = correoSnapshot.docs[0];
       const data = docExistente.data();
+      
       if (data.estado === "eliminado") {
+        // Verificar que la cédula también coincida con la registrada
+        if (data.cedula !== cedula) {
+          alert("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.");
+          return;
+        }
+        // Reactivar cuenta eliminada (ya se actualizó en el paso anterior o se actualiza aquí)
         await updateDoc(doc(db, "usuarios", docExistente.id), {
           nombre,
-          cedula,
           materia,
+          estado: "pendiente",
           fecha: new Date()
         });
         await sendPasswordResetEmail(auth, data.correo);
-        await updateDoc(doc(db, "usuarios", docExistente.id), { estado: "pendiente" });
         alert("El correo ya estaba registrado previamente. Se ha enviado una nueva solicitud al administrador y un correo para restablecer tu contraseña.");
         window.location.href = "aula.html";
         return;

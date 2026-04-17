@@ -195,15 +195,19 @@ window.registrarAdmin = async function() {
   if (password.length < 6) return alert("Contraseña muy débil");
 
   try {
-    // 1. Verificar si la cédula ya existe
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
-    
+
     if (!cedulaSnapshot.empty) {
       const docExistente = cedulaSnapshot.docs[0];
       const data = docExistente.data();
       
       if (data.estado === "eliminado") {
+        // Verificar que el correo coincida con el registrado
+        if (data.correo !== correo) {
+          alert("La cédula pertenece a una cuenta eliminada pero el correo no coincide con el registrado originalmente. Verifica los datos.");
+          return;
+        }
         // Reactivar cuenta eliminada actualizando a admin
         await updateDoc(doc(db, "usuarios", docExistente.id), {
           nombre,
@@ -212,7 +216,6 @@ window.registrarAdmin = async function() {
           estado: "activo",
           fecha: new Date()
         });
-        // Enviar reset de contraseña para que pueda establecer una nueva
         await sendPasswordResetEmail(auth, data.correo);
         alert("La cédula pertenecía a una cuenta eliminada. Se ha reactivado como administrador y se envió un correo para restablecer contraseña.");
         document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
@@ -224,16 +227,22 @@ window.registrarAdmin = async function() {
         return;
       }
     }
-    
+
     // 2. Verificar si el correo ya existe
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
-    
+
     if (!correoSnapshot.empty) {
       const docExistente = correoSnapshot.docs[0];
       const data = docExistente.data();
       
       if (data.estado === "eliminado") {
+        // Verificar que la cédula coincida con la registrada
+        if (data.cedula !== cedula) {
+          alert("El correo pertenece a una cuenta eliminada pero la cédula no coincide con la registrada originalmente. Verifica los datos.");
+          return;
+        }
+        // Reactivar cuenta eliminada actualizando a admin
         await updateDoc(doc(db, "usuarios", docExistente.id), {
           nombre,
           cedula,
