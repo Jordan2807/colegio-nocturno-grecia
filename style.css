@@ -229,7 +229,7 @@ footer {
 
 .titulo {
     flex: 1;
-    background: #e0e0e0;
+    background-color: #002b5c;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -237,6 +237,7 @@ footer {
     align-items: center;
     text-align: center;
     padding: 20px;
+    color: white;
 }
 
 .lista {
@@ -244,6 +245,8 @@ footer {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
+    background-color: #e0e0e0 ;
+    color: black;
 }
 
 .box {

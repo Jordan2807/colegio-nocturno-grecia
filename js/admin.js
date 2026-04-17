@@ -108,18 +108,25 @@ function crearTarjetaAdmin(id, data) {
 }
 
 function crearTarjetaProfesor(id, data) {
+  const estado = data.estado;
+  const estadoFormateado = estado.charAt(0).toUpperCase() + estado.slice(1);
+  
+  // Determinar visibilidad de botones según estado
+  const mostrarActivar = estado === 'pendiente' || estado === 'inactivo';
+  const mostrarInactivar = estado === 'pendiente' || estado === 'activo';
+  
   return `
     <div class="usuario-card">
       <div class="usuario-datos">
         <div class="dato"><label>Nombre</label><span>${data.nombre}</span></div>
         <div class="dato"><label>Cédula</label><span>${data.cedula}</span></div>
         <div class="dato"><label>Correo</label><span>${data.correo}</span></div>
-        <div class="dato"><label>Materia</label><span>${data.materia}</span></div>
-        <div class="dato"><label>Estado</label><span>${data.estado}</span></div>
+        <div class="dato"><label>Materia</label><span>${data.materia || '—'}</span></div>
+        <div class="dato"><label>Estado</label><span>${estadoFormateado}</span></div>
       </div>
       <div class="usuario-botones">
-        <button class="btn-admin btn-activar" data-id="${id}" data-accion="activar">Activar</button>
-        <button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>
+        ${mostrarActivar ? `<button class="btn-admin btn-activar" data-id="${id}" data-accion="activar">Activar</button>` : ''}
+        ${mostrarInactivar ? `<button class="btn-admin btn-inactivar" data-id="${id}" data-accion="inactivar">Inactivar</button>` : ''}
         <button class="btn-admin btn-eliminar" data-id="${id}" data-accion="eliminar">Eliminar</button>
         <button class="btn-admin btn-hacer-admin" data-id="${id}" data-accion="hacerAdmin">Hacer Admin</button>
       </div>
