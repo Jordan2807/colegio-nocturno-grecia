@@ -265,7 +265,7 @@ window.seleccionarYSubirArchivo = function() {
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        maxFileSize: 15000000,                   
+        maxFileSize: 15000000,
         publicId: (file) => {
             const base = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
             const random = Math.random().toString(36).substring(2, 8);
@@ -273,7 +273,20 @@ window.seleccionarYSubirArchivo = function() {
         },
         overwrite: false
     }, async (error, result) => {
-        // ... el resto del código existente ...
+        if (error) {
+            console.error("Error en la subida:", error);
+            alert("Error al subir el archivo.");
+            return;
+        }
+        
+        if (result && result.event === "success") {
+            console.log("Subida exitosa:", result.info);
+            await guardarArchivoEnFirestore(
+                result.info.original_filename,
+                result.info.secure_url,
+                result.info.public_id
+            );
+        }
     });
 
     widget.open();
