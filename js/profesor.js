@@ -265,21 +265,23 @@ window.seleccionarYSubirArchivo = function() {
         sources: ['local', 'url'],
         folder: `secciones/${seccionActualId}`,
         clientAllowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-        maxFileSize: 15000000
+        maxFileSize: 15000000,
+        resourceType: 'auto',           // Detecta automáticamente imagen/raw
+        type: 'upload',                 // Fuerza que el recurso sea público
+        // No incluyas overwrite, publicId, use_filename ni signing
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
-            alert("Error al subir el archivo.");
+            alert("Error al subir el archivo: " + (error.statusText || ''));
             return;
         }
         
         if (result && result.event === "success") {
             console.log("Subida exitosa:", result.info);
-            // Cloudinary genera un public_id automático
             await guardarArchivoEnFirestore(
                 result.info.original_filename,
                 result.info.secure_url,
-                result.info.public_id       // ← Este es el ID que necesitamos para eliminar
+                result.info.public_id
             );
         }
     });
