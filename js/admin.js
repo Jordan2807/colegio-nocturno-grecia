@@ -161,9 +161,9 @@ document.addEventListener('click', async (e) => {
 });
 
 window.registrarAdmin = async function() {
-  const correo = document.getElementById("correoAdmin")?.value;
-  const nombre = document.getElementById("nombreAdmin")?.value;
-  const cedula = document.getElementById("cedulaAdmin")?.value;
+  const correo = document.getElementById("correoAdmin")?.value.trim();
+  const nombre = document.getElementById("nombreAdmin")?.value.trim();
+  const cedula = document.getElementById("cedulaAdmin")?.value.trim();
   const password = document.getElementById("password")?.value;
   const confirm = document.getElementById("confirmPassword")?.value;
 

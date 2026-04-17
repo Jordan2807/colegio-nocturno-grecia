@@ -56,12 +56,14 @@ window.mostrarPerfil = function() {
   document.getElementById("perfil")?.classList.remove("oculto");
   document.getElementById("secciones")?.classList.add("oculto");
   document.getElementById("archivos")?.classList.add("oculto");
+  document.getElementById("sidebar")?.classList.remove("active");
 };
 
 window.mostrarSecciones = function() {
   document.getElementById("perfil")?.classList.add("oculto");
   document.getElementById("secciones")?.classList.remove("oculto");
   document.getElementById("archivos")?.classList.add("oculto");
+  document.getElementById("sidebar")?.classList.remove("active");
 };
 
 // ---------- PERFIL (con confirmación de contraseña) ----------
@@ -76,6 +78,12 @@ window.guardarPerfil = async function() {
     alert("No hay sesión activa");
     return;
   }
+
+  const nombre = nombreInput?.value.trim();
+  const cedula = cedulaInput?.value.trim();
+  const materia = materiaInput?.value.trim();
+  const password = passwordInput?.value;
+  const confirm = confirmInput?.value;
 
   const nombre = nombreInput?.value.trim();
   const cedula = cedulaInput?.value.trim();
@@ -222,21 +230,40 @@ async function eliminarSeccion(id, nombre) {
   const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
 
   try {
-    // Obtener todos los archivos de esta sección
+    // 1. Obtener todos los archivos de esta sección
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
     
-    // Eliminar cada archivo de Cloudinary y Firestore en paralelo
-    const deletePromises = [];
-    archivosSnapshot.forEach((archivoDoc) => {
+    // 2. Eliminar cada archivo de Cloudinary y Firestore
+    const errores = [];
+    
+    for (const archivoDoc of archivosSnapshot.docs) {
       const archivoData = archivoDoc.data();
-      deletePromises.push(eliminarDeCloudinary({ publicId: archivoData.publicId }));
-      deletePromises.push(deleteDoc(doc(db, "archivos", archivoDoc.id)));
-    });
+      const publicId = archivoData.publicId;
+      
+      if (!publicId) {
+        console.warn("Archivo sin publicId, se omite:", archivoData.nombre);
+        continue;
+      }
+      
+      try {
+        // Intentar eliminar de Cloudinary
+        await eliminarDeCloudinary({ publicId });
+        // Si tiene éxito, eliminar de Firestore
+        await deleteDoc(doc(db, "archivos", archivoDoc.id));
+      } catch (error) {
+        console.error(`Error al eliminar archivo ${archivoData.nombre}:`, error);
+        errores.push(archivoData.nombre);
+      }
+    }
     
-    await Promise.all(deletePromises);
+    // 3. Si hubo errores, NO eliminar la sección y notificar
+    if (errores.length > 0) {
+      alert(`No se pudo eliminar la sección porque falló la eliminación de los siguientes archivos:\n- ${errores.join('\n- ')}\n\nIntenta de nuevo más tarde.`);
+      return;
+    }
     
-    // Finalmente eliminar la sección
+    // 4. Si todos los archivos se eliminaron correctamente, borrar la sección
     await deleteDoc(doc(db, "secciones", id));
     
     alert("Sección y archivos eliminados correctamente");
@@ -249,7 +276,8 @@ async function eliminarSeccion(id, nombre) {
       seccionActualId = null;
     }
   } catch (error) {
-    alert("Error al eliminar la sección. Intenta de nuevo.");
+    console.error("Error al procesar la eliminación de la sección:", error);
+    alert("Error inesperado al eliminar la sección. Intenta de nuevo.");
   }
 }
 // ---------- ARCHIVOS ----------

@@ -194,6 +194,14 @@ window.registrar = async () => {
   const password = document.getElementById("password")?.value;
   const confirm = document.getElementById("confirmPassword")?.value;
 
+    // Limpiar espacios al inicio y final
+  const nombre = nombreInput?.value.trim();
+  const cedula = cedulaInput?.value.trim();
+  const materia = materiaInput?.value.trim();
+  const correo = correoInput?.value.trim();
+  const password = passwordInput?.value;
+  const confirm = confirmInput?.value;
+
   if (!nombre || !cedula || !materia || !correo || !password || !confirm) {
     return alert("Todos los campos son obligatorios");
   }
