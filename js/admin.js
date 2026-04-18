@@ -255,7 +255,7 @@ document.addEventListener('click', async (e) => {
       
       for (const seccionDoc of seccionesSnapshot.docs) {
         try {
-          await eeliminarSeccion(seccionDoc.id);
+          await eliminarSeccion(seccionDoc.id);
         } catch (error) {
           await mostrarAlerta(`Error al eliminar la sección "${seccionDoc.data().nombre}": ${error.message}`, 'error');
           return;
