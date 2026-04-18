@@ -88,6 +88,7 @@ async function cargarUsuarios() {
     contenedor.style.display = hayProfesores ? "block" : "none";
   } catch (error) {
     console.error("Error al cargar usuarios:", error);
+    ocultarLoader();
     await mostrarAlerta("Error al cargar la lista de usuarios.", "error");
   } finally {
     ocultarLoader();
@@ -155,6 +156,7 @@ async function cambiarRol(id, nuevoRol) {
     await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
     await cargarUsuarios();
   } catch (error) {
+    ocultarLoader();
     await mostrarAlerta("Error al cambiar el rol.", "error");
   } finally {
     ocultarLoader();
@@ -167,6 +169,7 @@ async function cambiarEstado(id, nuevoEstado) {
     await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
     await cargarUsuarios();
   } catch (error) {
+    ocultarLoader();
     await mostrarAlerta("Error al cambiar el estado.", "error");
   } finally {
     ocultarLoader();
@@ -235,11 +238,14 @@ document.addEventListener('click', async (e) => {
 
   if (accion === 'activar') {
     await cambiarEstado(id, 'activo');
+    ocultarLoader();
     await mostrarAlerta('Usuario activado', 'success');
   } else if (accion === 'inactivar') {
     await cambiarEstado(id, 'inactivo');
+    ocultarLoader();
     await mostrarAlerta('Usuario inactivado', 'warning');
   } else if (accion === 'eliminar') {
+    ocultarLoader();
     const confirmado = await mostrarConfirmacion(
       '¿Eliminar permanentemente al usuario? Se borrarán todas sus secciones, archivos y la cuenta de acceso. Esta acción no se puede deshacer.'
     );
@@ -249,6 +255,7 @@ document.addEventListener('click', async (e) => {
     try {
       const usuarioDoc = await getDoc(doc(db, "usuarios", id));
       if (!usuarioDoc.exists()) {
+        ocultarLoader();
         await mostrarAlerta('El usuario ya no existe.', 'info');
         await cargarUsuarios();
         return;
@@ -266,6 +273,7 @@ document.addEventListener('click', async (e) => {
         try {
           await eliminarSeccionSilenciosa(seccionDoc.id);
         } catch (error) {
+          ocultarLoader();
           await mostrarAlerta(`Error al eliminar la sección "${nombreSeccion}": ${error.message}`, 'error');
           return;
         }
@@ -278,23 +286,30 @@ document.addEventListener('click', async (e) => {
       const functions = getFunctions();
       const eliminarDeAuth = httpsCallable(functions, 'eliminarUsuarioAuth');
       await eliminarDeAuth({ uid });
-
+      ocultarLoader();
       await mostrarAlerta('Usuario eliminado permanentemente junto con todos sus datos.', 'success');
       await cargarUsuarios();
     } catch (error) {
       console.error('Error en eliminación completa:', error);
+      ocultarLoader();
       await mostrarAlerta('Error al eliminar usuario: ' + error.message, 'error');
     } finally {
       ocultarLoader();
     }
   } else if (accion === 'hacerAdmin') {
+    ocultarLoader();
     if (await mostrarConfirmacion('¿Convertir este profesor en administrador?', 'Confirmar')) {
+      mostrarLoader();
       await cambiarRol(id, 'admin');
+      ocultarLoader();
       await mostrarAlerta('Ahora es administrador', 'success');
     }
   } else if (accion === 'hacerProfesor') {
+    ocultarLoader();
     if (await mostrarConfirmacion('¿Convertir este administrador en profesor?', 'Confirmar')) {
+      mostrarLoader();
       await cambiarRol(id, 'profesor');
+      ocultarLoader();
       await mostrarAlerta('Ahora es profesor', 'success');
     }
   }
@@ -320,6 +335,7 @@ window.registrarAdmin = async function() {
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
     if (!cedulaSnapshot.empty) {
+      ocultarLoader();
       await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
       return;
     }
@@ -328,17 +344,20 @@ window.registrarAdmin = async function() {
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
     if (!correoSnapshot.empty) {
+      ocultarLoader();
       await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
       return;
     }
 
     // Crear nuevo administrador
     await crearAdministrador(correo, nombre, cedula, password);
+    ocultarLoader();
     await mostrarAlerta("Administrador creado correctamente", "success");
     document.getElementById("panelNuevoAdmin")?.classList.add("oculto");
     limpiarFormularioAdmin();
     await cargarUsuarios();
   } catch (e) {
+    ocultarLoader();
     await mostrarAlerta("Error: " + e.message, "error");
   } finally {
     ocultarLoader();

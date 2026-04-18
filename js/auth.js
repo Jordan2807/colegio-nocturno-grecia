@@ -216,12 +216,11 @@ window.registrar = async () => {
     // Crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
     ocultarLoader();
-    // Redirige, no es necesario ocultar loader
     await mostrarAlerta("Solicitud enviada al administrador", "success");
     window.location.href = "aula.html";
     
   } catch (e) {
-    
+    ocultarLoader();
     await mostrarAlerta("Error: " + e.message, "error");
   }
 };

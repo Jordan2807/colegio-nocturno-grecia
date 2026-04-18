@@ -141,7 +141,7 @@ window.guardarPerfil = async function() {
     if (password) {
       await updatePassword(currentUser, password);
     }
-
+    ocultarLoader();
     await mostrarAlerta("Perfil actualizado correctamente" + (nuevoCorreo !== correoActual ? " - Se ha enviado un correo de verificación a la nueva dirección." : ""), "success");
     
     if (passwordInput) passwordInput.value = "";
@@ -159,6 +159,7 @@ window.guardarPerfil = async function() {
     } else if (error.message) {
       mensaje = error.message;
     }
+    ocultarLoader();
     await mostrarAlerta(mensaje, "error");
   } finally {
     ocultarLoader();
@@ -174,6 +175,7 @@ window.crearSeccion = async function() {
   try {
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) {
+      ocultarLoader();
       await mostrarAlerta("No se encontró el perfil del profesor", "error");
       return;
     }
@@ -182,6 +184,7 @@ window.crearSeccion = async function() {
     const materia = profesorData.materia?.trim();
     
     if (!materia) {
+      ocultarLoader();
       await mostrarAlerta("Debe completar el campo 'Materia' en su perfil antes de crear secciones. Vaya a 'Editar Perfil' para agregarlo.", "error");
       return;
     }
@@ -196,6 +199,7 @@ window.crearSeccion = async function() {
     await cargarSecciones();
   } catch (error) {
     console.error("Error al verificar materia:", error);
+    ocultarLoader();
     await mostrarAlerta("No se pudo verificar el perfil. Intente de nuevo.", "error");
   } finally {
     ocultarLoader();
@@ -236,6 +240,7 @@ async function cargarSecciones() {
     });
   } catch (error) {
     console.error("Error al cargar secciones:", error);
+    ocultarLoader();
     await mostrarAlerta("Error al cargar las secciones.", "error");
   } finally {
     ocultarLoader();
@@ -282,13 +287,14 @@ async function eliminarSeccion(id, nombre) {
         eliminados++;
       } catch (error) {
         console.error(`Error al eliminar "${nombreArchivo}":`, error);
+        ocultarLoader();
         await mostrarAlerta(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`, "error");
         return;
       }
     }
     
     await deleteDoc(doc(db, "secciones", id));
-    
+    ocultarLoader(); 
     await mostrarAlerta(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`, "success");
     await cargarSecciones();
     
@@ -299,6 +305,7 @@ async function eliminarSeccion(id, nombre) {
     }
   } catch (error) {
     console.error("Error general al eliminar sección:", error);
+    ocultarLoader();
     await mostrarAlerta("Error inesperado. Intenta de nuevo.", "error");
   } finally {
     ocultarLoader();
@@ -347,6 +354,7 @@ window.seleccionarYSubirArchivo = async function() {
     }, async (error, result) => {
         if (error) {
             console.error("Error en la subida:", error);
+            ocultarLoader();
             await mostrarAlerta("Error al subir el archivo: " + (error.statusText || ''), "error");
             return;
         }
@@ -378,8 +386,10 @@ async function guardarArchivoEnFirestore(nombreArchivo, urlArchivo, publicId) {
             publicId: publicId
         });
         await cargarArchivos();
+        ocultarLoader();
         await mostrarAlerta("Archivo subido correctamente", "success");
     } catch (error) {
+        ocultarLoader();
         await mostrarAlerta("El archivo se subió, pero hubo un error al guardarlo en la base de datos.", "error");
     }
 }
@@ -415,6 +425,7 @@ async function cargarArchivos() {
         });
     } catch (error) {
         console.error("Error al cargar archivos:", error);
+        ocultarLoader();
         await mostrarAlerta("Error al cargar los archivos.", "error");
     } finally {
         ocultarLoader();
@@ -447,10 +458,11 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
     }
 
     await deleteDoc(doc(db, "archivos", idFirestore));
-    
+    ocultarLoader();
     await mostrarAlerta("Archivo eliminado correctamente", "success");
     await cargarArchivos();
   } catch (error) {
+    ocultarLoader();
     await mostrarAlerta("No se pudo eliminar el archivo.", "error");
   } finally {
     ocultarLoader();
