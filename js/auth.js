@@ -164,7 +164,7 @@ window.login = async () => {
     }
   } catch (error) {
     ocultarLoader();
-    await mostrarAlerta(error.message, "error");
+    await mostrarAlerta("Contraseña incorrecta", "error");
   }
 };
 
