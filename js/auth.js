@@ -259,6 +259,7 @@ window.olvidePassword = async () => {
     }
 
     await sendPasswordResetEmail(auth, correo);
+    ocultarLoader();
     await mostrarAlerta("Se ha enviado un enlace de restablecimiento a su correo.", "info");
     window.location.href = "aula.html";
     
