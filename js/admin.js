@@ -149,53 +149,38 @@ async function cambiarEstado(id, nuevoEstado) {
 }
 
 // ---------- ELIMINACIÓN DE SECCIÓN----------
-async function eliminarSeccion(id, nombre) {
-  const confirmado = await mostrarConfirmacion(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`, 'Confirmar eliminación');
-  if (!confirmado) return;
-
-  try {
-    const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
-    const archivosSnapshot = await getDocs(archivosQuery);
+async function eliminarSeccionSilenciosa(id, nombre) {
+  // Obtener archivos de la sección
+  const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
+  const archivosSnapshot = await getDocs(archivosQuery);
+  
+  const errores = [];
+  for (const archivoDoc of archivosSnapshot.docs) {
+    const archivoData = archivoDoc.data();
+    const publicId = archivoData.publicId;
     
-    const archivos = archivosSnapshot.docs;
-    let eliminados = 0;
-    
-    for (const archivoDoc of archivos) {
-      const archivoData = archivoDoc.data();
-      const nombreArchivo = archivoData.nombre;
-      const publicId = archivoData.publicId;
-      
-      if (!publicId) {
-        await deleteDoc(doc(db, "archivos", archivoDoc.id));
-        eliminados++;
-        continue;
-      }
-      
-      try {
-        await eliminarArchivoSilencioso(archivoDoc.id, nombreArchivo, publicId);
-        eliminados++;
-      } catch (error) {
-        console.error(`Error al eliminar "${nombreArchivo}":`, error);
-        await mostrarAlerta(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`, "error");
-        return;
-      }
+    if (!publicId) {
+      // Si no tiene publicId, solo borramos de Firestore
+      await deleteDoc(doc(db, "archivos", archivoDoc.id));
+      continue;
     }
     
-    await deleteDoc(doc(db, "secciones", id));
-    
-    await mostrarAlerta(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`, "success");
-    await cargarSecciones();
-    
-    if (seccionActualId === id) {
-      document.getElementById("archivos")?.classList.add("oculto");
-      document.getElementById("secciones")?.classList.remove("oculto");
-      seccionActualId = null;
+    try {
+      await eliminarArchivoSilencioso(archivoDoc.id, archivoData.nombre, publicId);
+    } catch (error) {
+      console.error(`Error eliminando archivo "${archivoData.nombre}" de sección "${nombre}":`, error);
+      errores.push(archivoData.nombre);
     }
-  } catch (error) {
-    console.error("Error general al eliminar sección:", error);
-    await mostrarAlerta("Error inesperado. Intenta de nuevo.", "error");
   }
+  
+  if (errores.length > 0) {
+    throw new Error(`No se pudieron eliminar los siguientes archivos de la sección "${nombre}":\n- ${errores.join('\n- ')}`);
+  }
+  
+  // Eliminar la sección
+  await deleteDoc(doc(db, "secciones", id));
 }
+
 
 async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
   const idToken = await auth.currentUser.getIdToken();
@@ -255,9 +240,9 @@ document.addEventListener('click', async (e) => {
       
       for (const seccionDoc of seccionesSnapshot.docs) {
         try {
-          await eliminarSeccion(seccionDoc.id);
+          await eliminarSeccionSilenciosa(seccionDoc.id);
         } catch (error) {
-          await mostrarAlerta(`Error al eliminar la sección "${seccionDoc.data().nombre}": ${error.message}`, 'error');
+          await mostrarAlerta(`Error al eliminar la sección "${nombreSeccion}": ${error.message}`, 'error');
           return;
         }
       }
