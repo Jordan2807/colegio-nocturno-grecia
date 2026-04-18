@@ -695,6 +695,11 @@ footer {
     padding: 20px;
 }
 
+.olvide{
+    padding: 5%;
+    margin: auto;
+}
+
 .btn-volver {
     background: none;
     border: none;
