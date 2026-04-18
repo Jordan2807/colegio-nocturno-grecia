@@ -1,6 +1,6 @@
 // js/auth.js
 import { auth, db, firebaseConfig } from './firebase-init.js';
-import { mostrarAlerta } from './utils.js';
+import { mostrarLoader, ocultarLoader, mostrarAlerta } from './utils.js';
 
 // Importaciones de App (para crear instancia secundaria)
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -151,6 +151,7 @@ window.login = async () => {
     return;
   }
 
+  mostrarLoader();
   try {
     const usuario = await login(cedula, password);
     
@@ -162,6 +163,7 @@ window.login = async () => {
       window.location.href = "aula.html";
     }
   } catch (error) {
+    ocultarLoader();
     await mostrarAlerta(error.message, "error");
   }
 };
@@ -191,11 +193,13 @@ window.registrar = async () => {
   if (password !== confirm) return await mostrarAlerta("Las contraseñas no coinciden", "error");
   if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
+  mostrarLoader();
   try {
     // Verificar si la cédula ya está registrada
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
     if (!cedulaSnapshot.empty) {
+      ocultarLoader();
       await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
       return;
     }
@@ -204,16 +208,19 @@ window.registrar = async () => {
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
     if (!correoSnapshot.empty) {
+      ocultarLoader();
       await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
       return;
     }
 
     // Crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
+    // No ocultamos loader porque redirige
     await mostrarAlerta("Solicitud enviada al administrador", "success");
     window.location.href = "aula.html";
     
   } catch (e) {
+    ocultarLoader();
     await mostrarAlerta("Error: " + e.message, "error");
   }
 };
@@ -230,12 +237,14 @@ window.olvidePassword = async () => {
     return;
   }
 
+  mostrarLoader();
   try {
     // Verificar si el correo existe en Firestore
     const q = query(collection(db, "usuarios"), where("correo", "==", correo));
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
+      ocultarLoader();
       await mostrarAlerta("El correo ingresado no está registrado en el sistema.", "error");
       return;
     }
@@ -245,6 +254,7 @@ window.olvidePassword = async () => {
     const data = docUsuario.data();
     
     if (data.estado === "inactivo") {
+      ocultarLoader();
       await mostrarAlerta("Esta cuenta está inactiva. Contacte al administrador.", "info");
       return;
     }
@@ -255,6 +265,7 @@ window.olvidePassword = async () => {
     window.location.href = "aula.html";
     
   } catch (error) {
+    ocultarLoader();
     console.error("Error al procesar solicitud:", error);
     await mostrarAlerta("Ocurrió un error. Intente de nuevo más tarde.", "error");
   }

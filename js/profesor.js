@@ -7,13 +7,14 @@ import {
   doc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { updatePassword, updateEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+import { mostrarLoader, ocultarLoader, mostrarAlerta, mostrarConfirmacion } from './utils.js';
 
 let currentUser = null;
 let seccionActualId = null;
 
 // ---------- INICIALIZACIÓN ----------
 async function init() {
+  mostrarLoader();
   try {
     const { user, data } = await protegerPagina(['admin', 'profesor']);
     currentUser = user;
@@ -26,7 +27,11 @@ async function init() {
     setupPasswordToggles();
     await cargarDatosProfesor(data);
     await cargarSecciones();
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error en inicialización:", e);
+  } finally {
+    ocultarLoader();
+  }
 }
 
 window.irAAdmin = function() {
@@ -103,6 +108,7 @@ window.guardarPerfil = async function() {
     }
   }
 
+  mostrarLoader();
   try {
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) throw new Error("Perfil no encontrado");
@@ -115,6 +121,7 @@ window.guardarPerfil = async function() {
       if (!correoSnapshot.empty) {
         const otroDoc = correoSnapshot.docs[0];
         if (otroDoc.id !== currentUser.uid) {
+          ocultarLoader();
           await mostrarAlerta("El correo ingresado ya está en uso por otra cuenta.", "error");
           return;
         }
@@ -153,6 +160,8 @@ window.guardarPerfil = async function() {
       mensaje = error.message;
     }
     await mostrarAlerta(mensaje, "error");
+  } finally {
+    ocultarLoader();
   }
 };
 
@@ -161,6 +170,7 @@ window.crearSeccion = async function() {
   const nombreSeccion = document.getElementById("nombreSeccion")?.value;
   if (!nombreSeccion) return await mostrarAlerta("Ingrese el nombre de la sección", "error");
 
+  mostrarLoader();
   try {
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) {
@@ -175,52 +185,61 @@ window.crearSeccion = async function() {
       await mostrarAlerta("Debe completar el campo 'Materia' en su perfil antes de crear secciones. Vaya a 'Editar Perfil' para agregarlo.", "error");
       return;
     }
+
+    await addDoc(collection(db, "secciones"), {
+      nombre: nombreSeccion,
+      profesor: currentUser.uid,
+      fecha: new Date()
+    });
+
+    document.getElementById("nombreSeccion").value = "";
+    await cargarSecciones();
   } catch (error) {
     console.error("Error al verificar materia:", error);
     await mostrarAlerta("No se pudo verificar el perfil. Intente de nuevo.", "error");
-    return;
+  } finally {
+    ocultarLoader();
   }
-
-  await addDoc(collection(db, "secciones"), {
-    nombre: nombreSeccion,
-    profesor: currentUser.uid,
-    fecha: new Date()
-  });
-
-  document.getElementById("nombreSeccion").value = "";
-  await cargarSecciones();
 };
 
 async function cargarSecciones() {
   const lista = document.getElementById("listaSecciones");
   if (!lista) return;
 
-  const q = query(collection(db, "secciones"), where("profesor", "==", currentUser.uid));
-  const snapshot = await getDocs(q);
+  mostrarLoader();
+  try {
+    const q = query(collection(db, "secciones"), where("profesor", "==", currentUser.uid));
+    const snapshot = await getDocs(q);
 
-  lista.innerHTML = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta tarjeta-seccion";
-    tarjeta.innerHTML = `
-      <span class="nombre-seccion">${data.nombre}</span>
-      <button class="btn-eliminar-seccion" data-id="${doc.id}" title="Eliminar sección">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    `;
-    
-    tarjeta.querySelector('.nombre-seccion').addEventListener('click', () => {
-      abrirSeccion(doc.id, data.nombre);
+    lista.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const tarjeta = document.createElement("div");
+      tarjeta.className = "tarjeta tarjeta-seccion";
+      tarjeta.innerHTML = `
+        <span class="nombre-seccion">${data.nombre}</span>
+        <button class="btn-eliminar-seccion" data-id="${doc.id}" title="Eliminar sección">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      `;
+      
+      tarjeta.querySelector('.nombre-seccion').addEventListener('click', () => {
+        abrirSeccion(doc.id, data.nombre);
+      });
+      
+      tarjeta.querySelector('.btn-eliminar-seccion').addEventListener('click', (e) => {
+        e.stopPropagation();
+        eliminarSeccion(doc.id, data.nombre);
+      });
+      
+      lista.appendChild(tarjeta);
     });
-    
-    tarjeta.querySelector('.btn-eliminar-seccion').addEventListener('click', (e) => {
-      e.stopPropagation();
-      eliminarSeccion(doc.id, data.nombre);
-    });
-    
-    lista.appendChild(tarjeta);
-  });
+  } catch (error) {
+    console.error("Error al cargar secciones:", error);
+    await mostrarAlerta("Error al cargar las secciones.", "error");
+  } finally {
+    ocultarLoader();
+  }
 }
 
 window.cargarSecciones = cargarSecciones;
@@ -239,6 +258,7 @@ async function eliminarSeccion(id, nombre) {
   const confirmado = await mostrarConfirmacion(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`, 'Confirmar eliminación');
   if (!confirmado) return;
 
+  mostrarLoader();
   try {
     const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
     const archivosSnapshot = await getDocs(archivosQuery);
@@ -280,6 +300,8 @@ async function eliminarSeccion(id, nombre) {
   } catch (error) {
     console.error("Error general al eliminar sección:", error);
     await mostrarAlerta("Error inesperado. Intenta de nuevo.", "error");
+  } finally {
+    ocultarLoader();
   }
 }
 
@@ -330,11 +352,16 @@ window.seleccionarYSubirArchivo = async function() {
         }
         
         if (result && result.event === "success") {
-            await guardarArchivoEnFirestore(
-                result.info.original_filename,
-                result.info.secure_url,
-                result.info.public_id
-            );
+            mostrarLoader();
+            try {
+                await guardarArchivoEnFirestore(
+                    result.info.original_filename,
+                    result.info.secure_url,
+                    result.info.public_id
+                );
+            } finally {
+                ocultarLoader();
+            }
         }
     });
 
@@ -361,35 +388,44 @@ async function cargarArchivos() {
     const lista = document.getElementById("listaArchivos");
     if (!lista || !seccionActualId) return;
 
-    const q = query(collection(db, "archivos"), where("seccion", "==", seccionActualId));
-    const snapshot = await getDocs(q);
+    mostrarLoader();
+    try {
+        const q = query(collection(db, "archivos"), where("seccion", "==", seccionActualId));
+        const snapshot = await getDocs(q);
 
-    lista.innerHTML = "";
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        const div = document.createElement("div");
-        div.className = "archivo-item";
-        div.innerHTML = `
-          <a href="${data.url}" target="_blank">${data.nombre}</a>
-          <button class="btn-eliminar-archivo" data-id="${doc.id}" data-public-id="${data.publicId}" title="Eliminar archivo">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        `;
-        
-        div.querySelector('.btn-eliminar-archivo').addEventListener('click', (e) => {
-          e.preventDefault();
-          const publicId = e.currentTarget.dataset.publicId;
-          eliminarArchivo(doc.id, data.nombre, publicId);
+        lista.innerHTML = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = "archivo-item";
+            div.innerHTML = `
+              <a href="${data.url}" target="_blank">${data.nombre}</a>
+              <button class="btn-eliminar-archivo" data-id="${doc.id}" data-public-id="${data.publicId}" title="Eliminar archivo">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            `;
+            
+            div.querySelector('.btn-eliminar-archivo').addEventListener('click', (e) => {
+              e.preventDefault();
+              const publicId = e.currentTarget.dataset.publicId;
+              eliminarArchivo(doc.id, data.nombre, publicId);
+            });
+            
+            lista.appendChild(div);
         });
-        
-        lista.appendChild(div);
-    });
+    } catch (error) {
+        console.error("Error al cargar archivos:", error);
+        await mostrarAlerta("Error al cargar los archivos.", "error");
+    } finally {
+        ocultarLoader();
+    }
 }
 
 async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
   const confirmado = await mostrarConfirmacion(`¿Eliminar el archivo "${nombreArchivo}"?`, 'Confirmar eliminación');
   if (!confirmado) return;
 
+  mostrarLoader();
   try {
     const idToken = await auth.currentUser.getIdToken();
     
@@ -416,6 +452,8 @@ async function eliminarArchivo(idFirestore, nombreArchivo, publicId) {
     await cargarArchivos();
   } catch (error) {
     await mostrarAlerta("No se pudo eliminar el archivo.", "error");
+  } finally {
+    ocultarLoader();
   }
 }
 

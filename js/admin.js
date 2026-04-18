@@ -7,7 +7,7 @@ import {
   collection, getDocs, doc, updateDoc, query, where, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { crearAdministrador } from './auth.js';
-import { mostrarAlerta, mostrarConfirmacion } from './utils.js';
+import { mostrarLoader, ocultarLoader, mostrarAlerta, mostrarConfirmacion } from './utils.js';
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let usuarioActual = null;
@@ -34,53 +34,64 @@ function setupEventListeners() {
 
 // ---------- CARGAR LISTA DE USUARIOS ----------
 async function cargarUsuarios() {
-  const contenedor = document.getElementById("usuarios");
-  const solicitudes = document.getElementById("solicitudes");
-  const contenedorAdmins = document.getElementById("admins");
-  const tituloSolicitudes = document.getElementById("tituloSolicitudes");
-  const tituloAdmins = document.getElementById("tituloAdmins");
-  const tituloUsuarios = document.getElementById("tituloUsuarios");
+  mostrarLoader();
+  try {
+    const contenedor = document.getElementById("usuarios");
+    const solicitudes = document.getElementById("solicitudes");
+    const contenedorAdmins = document.getElementById("admins");
+    const tituloSolicitudes = document.getElementById("tituloSolicitudes");
+    const tituloAdmins = document.getElementById("tituloAdmins");
+    const tituloUsuarios = document.getElementById("tituloUsuarios");
 
-  if (!contenedor) return;
-
-  contenedor.innerHTML = "";
-  solicitudes.innerHTML = "";
-  contenedorAdmins.innerHTML = "";
-
-  const querySnapshot = await getDocs(collection(db, "usuarios"));
-  const inicioSesion = new Date(sessionStorage.getItem("inicioAdmin") || 0);
-  
-  let haySolicitudes = false, hayAdmins = false, hayProfesores = false;
-
-  querySnapshot.forEach((docu) => {
-    const data = docu.data();
-
-    const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
-    const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
-
-    if (data.rol === "admin") {
-      if (usuarioActual && usuarioActual.uid === docu.id) return;
-      const tarjeta = crearTarjetaAdmin(docu.id, data);
-      contenedorAdmins.innerHTML += tarjeta;
-      hayAdmins = true;
-    } else if (data.rol === "profesor") {
-      const tarjeta = crearTarjetaProfesor(docu.id, data);
-      if (esNueva) {
-        solicitudes.innerHTML += tarjeta;
-        haySolicitudes = true;
-      } else {
-        contenedor.innerHTML += tarjeta;
-        hayProfesores = true;
-      }
+    if (!contenedor) {
+      ocultarLoader();
+      return;
     }
-  });
 
-  tituloSolicitudes.style.display = haySolicitudes ? "block" : "none";
-  solicitudes.style.display = haySolicitudes ? "block" : "none";
-  tituloAdmins.style.display = hayAdmins ? "block" : "none";
-  contenedorAdmins.style.display = hayAdmins ? "block" : "none";
-  tituloUsuarios.style.display = hayProfesores ? "block" : "none";
-  contenedor.style.display = hayProfesores ? "block" : "none";
+    contenedor.innerHTML = "";
+    solicitudes.innerHTML = "";
+    contenedorAdmins.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "usuarios"));
+    const inicioSesion = new Date(sessionStorage.getItem("inicioAdmin") || 0);
+
+    let haySolicitudes = false, hayAdmins = false, hayProfesores = false;
+
+    querySnapshot.forEach((docu) => {
+      const data = docu.data();
+
+      const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
+      const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
+
+      if (data.rol === "admin") {
+        if (usuarioActual && usuarioActual.uid === docu.id) return;
+        const tarjeta = crearTarjetaAdmin(docu.id, data);
+        contenedorAdmins.innerHTML += tarjeta;
+        hayAdmins = true;
+      } else if (data.rol === "profesor") {
+        const tarjeta = crearTarjetaProfesor(docu.id, data);
+        if (esNueva) {
+          solicitudes.innerHTML += tarjeta;
+          haySolicitudes = true;
+        } else {
+          contenedor.innerHTML += tarjeta;
+          hayProfesores = true;
+        }
+      }
+    });
+
+    tituloSolicitudes.style.display = haySolicitudes ? "block" : "none";
+    solicitudes.style.display = haySolicitudes ? "block" : "none";
+    tituloAdmins.style.display = hayAdmins ? "block" : "none";
+    contenedorAdmins.style.display = hayAdmins ? "block" : "none";
+    tituloUsuarios.style.display = hayProfesores ? "block" : "none";
+    contenedor.style.display = hayProfesores ? "block" : "none";
+  } catch (error) {
+    console.error("Error al cargar usuarios:", error);
+    await mostrarAlerta("Error al cargar la lista de usuarios.", "error");
+  } finally {
+    ocultarLoader();
+  }
 }
 
 function crearTarjetaAdmin(id, data) {
@@ -114,10 +125,10 @@ function crearTarjetaAdmin(id, data) {
 function crearTarjetaProfesor(id, data) {
   const estado = data.estado;
   const estadoFormateado = estado.charAt(0).toUpperCase() + estado.slice(1);
-  
+
   const mostrarActivar = estado === 'pendiente' || estado === 'inactivo';
   const mostrarInactivar = estado === 'pendiente' || estado === 'activo';
-  
+
   return `
     <div class="usuario-card">
       <div class="usuario-datos">
@@ -139,52 +150,62 @@ function crearTarjetaProfesor(id, data) {
 
 // ---------- FUNCIONES AUXILIARES ----------
 async function cambiarRol(id, nuevoRol) {
-  await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
-  await cargarUsuarios();
+  mostrarLoader();
+  try {
+    await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
+    await cargarUsuarios();
+  } catch (error) {
+    await mostrarAlerta("Error al cambiar el rol.", "error");
+  } finally {
+    ocultarLoader();
+  }
 }
 
 async function cambiarEstado(id, nuevoEstado) {
-  await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
-  await cargarUsuarios();
+  mostrarLoader();
+  try {
+    await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
+    await cargarUsuarios();
+  } catch (error) {
+    await mostrarAlerta("Error al cambiar el estado.", "error");
+  } finally {
+    ocultarLoader();
+  }
 }
 
 // ---------- ELIMINACIÓN DE SECCIÓN----------
-async function eliminarSeccionSilenciosa(id, nombre) {
-  // Obtener archivos de la sección
+async function eliminarSeccionSilenciosa(id) {
   const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
   const archivosSnapshot = await getDocs(archivosQuery);
-  
+
   const errores = [];
   for (const archivoDoc of archivosSnapshot.docs) {
     const archivoData = archivoDoc.data();
     const publicId = archivoData.publicId;
-    
+
     if (!publicId) {
-      // Si no tiene publicId, solo borramos de Firestore
       await deleteDoc(doc(db, "archivos", archivoDoc.id));
       continue;
     }
-    
+
     try {
       await eliminarArchivoSilencioso(archivoDoc.id, archivoData.nombre, publicId);
     } catch (error) {
-      console.error(`Error eliminando archivo "${archivoData.nombre}" de sección "${nombre}":`, error);
+      console.error(`Error eliminando archivo "${archivoData.nombre}":`, error);
       errores.push(archivoData.nombre);
     }
   }
-  
+
   if (errores.length > 0) {
-    throw new Error(`No se pudieron eliminar los siguientes archivos de la sección "${nombre}":\n- ${errores.join('\n- ')}`);
+    throw new Error(`No se pudieron eliminar los siguientes archivos:\n- ${errores.join('\n- ')}`);
   }
-  
-  // Eliminar la sección
+
   await deleteDoc(doc(db, "secciones", id));
 }
 
-
 async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
   const idToken = await auth.currentUser.getIdToken();
-  
+
   const response = await fetch(
     'https://us-central1-aula-virtual-colegio-f3290.cloudfunctions.net/eliminarArchivoCloudinary',
     {
@@ -211,7 +232,7 @@ document.addEventListener('click', async (e) => {
   if (!btn) return;
   const accion = btn.dataset.accion;
   const id = btn.dataset.id;
-  
+
   if (accion === 'activar') {
     await cambiarEstado(id, 'activo');
     await mostrarAlerta('Usuario activado', 'success');
@@ -224,6 +245,7 @@ document.addEventListener('click', async (e) => {
     );
     if (!confirmado) return;
 
+    mostrarLoader();
     try {
       const usuarioDoc = await getDoc(doc(db, "usuarios", id));
       if (!usuarioDoc.exists()) {
@@ -237,8 +259,10 @@ document.addEventListener('click', async (e) => {
       // 1. Eliminar todas las secciones que pertenezcan al usuario (sin importar su rol)
       const seccionesQuery = query(collection(db, "secciones"), where("profesor", "==", uid));
       const seccionesSnapshot = await getDocs(seccionesQuery);
-      
+
       for (const seccionDoc of seccionesSnapshot.docs) {
+        const seccionData = seccionDoc.data();
+        const nombreSeccion = seccionData.nombre || '(sin nombre)';
         try {
           await eliminarSeccionSilenciosa(seccionDoc.id);
         } catch (error) {
@@ -260,6 +284,8 @@ document.addEventListener('click', async (e) => {
     } catch (error) {
       console.error('Error en eliminación completa:', error);
       await mostrarAlerta('Error al eliminar usuario: ' + error.message, 'error');
+    } finally {
+      ocultarLoader();
     }
   } else if (accion === 'hacerAdmin') {
     if (await mostrarConfirmacion('¿Convertir este profesor en administrador?', 'Confirmar')) {
@@ -288,6 +314,7 @@ window.registrarAdmin = async function() {
   if (password !== confirm) return await mostrarAlerta("Las contraseñas no coinciden", "error");
   if (password.length < 6) return await mostrarAlerta("Contraseña muy débil", "error");
 
+  mostrarLoader();
   try {
     // Verificar cédula única
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
@@ -313,6 +340,8 @@ window.registrarAdmin = async function() {
     await cargarUsuarios();
   } catch (e) {
     await mostrarAlerta("Error: " + e.message, "error");
+  } finally {
+    ocultarLoader();
   }
 };
 

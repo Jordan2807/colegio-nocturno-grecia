@@ -6,6 +6,7 @@ import {
     getDocs,
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { mostrarLoader, ocultarLoader } from './utils.js';
 
 // Estado de navegación
 let estadoActual = 'profesores'; // 'profesores', 'secciones', 'archivos'
@@ -32,7 +33,12 @@ async function mostrarProfesores() {
         </div>
     `;
     
-    await cargarProfesoresConSecciones();
+    mostrarLoader();
+    try {
+        await cargarProfesoresConSecciones();
+    } finally {
+        ocultarLoader();
+    }
 }
 
 async function cargarProfesoresConSecciones() {
@@ -122,7 +128,12 @@ async function mostrarSeccionesProfesor(profesorId, nombre, materia) {
         </div>
     `;
     
-    await cargarSecciones(profesorId);
+    mostrarLoader();
+    try {
+        await cargarSecciones(profesorId);
+    } finally {
+        ocultarLoader();
+    }
 }
 
 async function cargarSecciones(profesorId) {
@@ -188,7 +199,12 @@ async function mostrarArchivosSeccion(seccionId, nombreSeccion) {
         </div>
     `;
     
-    await cargarArchivos(seccionId);
+    mostrarLoader();
+    try {
+        await cargarArchivos(seccionId);
+    } finally {
+        ocultarLoader();
+    }
 }
 
 async function cargarArchivos(seccionId) {

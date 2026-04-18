@@ -25,3 +25,15 @@ export async function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?', 
     });
     return result.isConfirmed;
 }
+
+///Muestra el loader global
+export function mostrarLoader() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) loader.classList.remove('oculto');
+}
+
+//Oculta el loader global
+export function ocultarLoader() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) loader.classList.add('oculto');
+}
