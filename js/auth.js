@@ -195,27 +195,27 @@ window.registrar = async () => {
 
   mostrarLoader();
   try {
-    // Verificar si la cédula ya está registrada
+    // Verificar cédula
     const cedulaQuery = query(collection(db, "usuarios"), where("cedula", "==", cedula));
     const cedulaSnapshot = await getDocs(cedulaQuery);
     if (!cedulaSnapshot.empty) {
-      ocultarLoader();
+      ocultarLoader();  // ← Ocultar antes de la alerta
       await mostrarAlerta("La cédula ingresada ya está registrada en el sistema.", "error");
       return;
     }
 
-    // Verificar si el correo ya está registrado
+    // Verificar correo
     const correoQuery = query(collection(db, "usuarios"), where("correo", "==", correo));
     const correoSnapshot = await getDocs(correoQuery);
     if (!correoSnapshot.empty) {
-      ocultarLoader();
+      ocultarLoader();  // ← Ocultar antes de la alerta
       await mostrarAlerta("El correo electrónico ya está en uso por otra cuenta.", "error");
       return;
     }
 
     // Crear nuevo usuario
     await registrarProfesor({ nombre, cedula, materia, correo, password });
-    // No ocultamos loader porque redirige
+    // Redirige, no es necesario ocultar loader
     await mostrarAlerta("Solicitud enviada al administrador", "success");
     window.location.href = "aula.html";
     
@@ -239,7 +239,6 @@ window.olvidePassword = async () => {
 
   mostrarLoader();
   try {
-    // Verificar si el correo existe en Firestore
     const q = query(collection(db, "usuarios"), where("correo", "==", correo));
     const querySnapshot = await getDocs(q);
     
@@ -249,7 +248,6 @@ window.olvidePassword = async () => {
       return;
     }
 
-    // Verificar que la cuenta no esté inactiva 
     const docUsuario = querySnapshot.docs[0];
     const data = docUsuario.data();
     
@@ -259,7 +257,6 @@ window.olvidePassword = async () => {
       return;
     }
 
-    // Enviar correo de restablecimiento
     await sendPasswordResetEmail(auth, correo);
     await mostrarAlerta("Se ha enviado un enlace de restablecimiento a su correo.", "info");
     window.location.href = "aula.html";
