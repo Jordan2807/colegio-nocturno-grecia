@@ -149,32 +149,75 @@ async function cambiarEstado(id, nuevoEstado) {
 }
 
 // ---------- ELIMINACIÓN DE SECCIÓN----------
-async function eliminarSeccionCompleta(seccionId) {
-  const functions = getFunctions();
-  const eliminarDeCloudinary = httpsCallable(functions, 'eliminarArchivoCloudinary');
+async function eliminarSeccion(id, nombre) {
+  const confirmado = await mostrarConfirmacion(`¿Eliminar la sección "${nombre}" y TODOS sus archivos? Esta acción no se puede deshacer.`, 'Confirmar eliminación');
+  if (!confirmado) return;
 
-  const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", seccionId));
-  const archivosSnapshot = await getDocs(archivosQuery);
-
-  const errores = [];
-  for (const archivoDoc of archivosSnapshot.docs) {
-    const archivoData = archivoDoc.data();
-    const publicId = archivoData.publicId;
-    if (!publicId) continue;
-    try {
-      await eliminarDeCloudinary({ publicId });
-      await deleteDoc(doc(db, "archivos", archivoDoc.id));
-    } catch (error) {
-      console.error(`Error eliminando archivo ${archivoData.nombre}:`, error);
-      errores.push(archivoData.nombre);
+  try {
+    const archivosQuery = query(collection(db, "archivos"), where("seccion", "==", id));
+    const archivosSnapshot = await getDocs(archivosQuery);
+    
+    const archivos = archivosSnapshot.docs;
+    let eliminados = 0;
+    
+    for (const archivoDoc of archivos) {
+      const archivoData = archivoDoc.data();
+      const nombreArchivo = archivoData.nombre;
+      const publicId = archivoData.publicId;
+      
+      if (!publicId) {
+        await deleteDoc(doc(db, "archivos", archivoDoc.id));
+        eliminados++;
+        continue;
+      }
+      
+      try {
+        await eliminarArchivoSilencioso(archivoDoc.id, nombreArchivo, publicId);
+        eliminados++;
+      } catch (error) {
+        console.error(`Error al eliminar "${nombreArchivo}":`, error);
+        await mostrarAlerta(`No se pudo eliminar el archivo "${nombreArchivo}".\nSe detuvo la eliminación de la sección.\nSe eliminaron ${eliminados} archivos antes del error.`, "error");
+        return;
+      }
     }
+    
+    await deleteDoc(doc(db, "secciones", id));
+    
+    await mostrarAlerta(`Sección "${nombre}" y ${eliminados} archivo(s) eliminados correctamente.`, "success");
+    await cargarSecciones();
+    
+    if (seccionActualId === id) {
+      document.getElementById("archivos")?.classList.add("oculto");
+      document.getElementById("secciones")?.classList.remove("oculto");
+      seccionActualId = null;
+    }
+  } catch (error) {
+    console.error("Error general al eliminar sección:", error);
+    await mostrarAlerta("Error inesperado. Intenta de nuevo.", "error");
+  }
+}
+
+async function eliminarArchivoSilencioso(idFirestore, nombreArchivo, publicId) {
+  const idToken = await auth.currentUser.getIdToken();
+  
+  const response = await fetch(
+    'https://us-central1-aula-virtual-colegio-f3290.cloudfunctions.net/eliminarArchivoCloudinary',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ publicId })
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Error al eliminar de Cloudinary');
   }
 
-  if (errores.length > 0) {
-    throw new Error(`No se pudieron eliminar los siguientes archivos:\n- ${errores.join('\n- ')}`);
-  }
-
-  await deleteDoc(doc(db, "secciones", seccionId));
+  await deleteDoc(doc(db, "archivos", idFirestore));
 }
 
 // ---------- DELEGACIÓN DE EVENTOS ----------
@@ -212,7 +255,7 @@ document.addEventListener('click', async (e) => {
       
       for (const seccionDoc of seccionesSnapshot.docs) {
         try {
-          await eliminarSeccionCompleta(seccionDoc.id);
+          await eeliminarSeccion(seccionDoc.id);
         } catch (error) {
           await mostrarAlerta(`Error al eliminar la sección "${seccionDoc.data().nombre}": ${error.message}`, 'error');
           return;
