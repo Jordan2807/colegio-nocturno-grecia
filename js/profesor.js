@@ -168,11 +168,15 @@ window.guardarPerfil = async function() {
 
 // ---------- SECCIONES ----------
 window.crearSeccion = async function() {
-  const nombreSeccion = document.getElementById("nombreSeccion")?.value;
+  let nombreSeccion = document.getElementById("nombreSeccion")?.value;
   if (!nombreSeccion) return await mostrarAlerta("Ingrese el nombre de la sección", "error");
+
+  nombreSeccion = nombreSeccion.trim(); // Elimina espacios al inicio y final
+  if (!nombreSeccion) return await mostrarAlerta("El nombre de la sección no puede estar vacío", "error");
 
   mostrarLoader();
   try {
+    // Verificar que el profesor tenga materia registrada
     const userDoc = await getDoc(doc(db, "usuarios", currentUser.uid));
     if (!userDoc.exists()) {
       ocultarLoader();
@@ -189,6 +193,20 @@ window.crearSeccion = async function() {
       return;
     }
 
+    // Verificar si ya existe una sección con el mismo nombre para este profesor
+    const q = query(
+      collection(db, "secciones"),
+      where("profesor", "==", currentUser.uid),
+      where("nombre", "==", nombreSeccion)
+    );
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      ocultarLoader();
+      await mostrarAlerta("Ya existe una sección con ese nombre. Elija otro nombre.", "error");
+      return;
+    }
+
+    // Crear la sección
     await addDoc(collection(db, "secciones"), {
       nombre: nombreSeccion,
       profesor: currentUser.uid,
@@ -198,9 +216,9 @@ window.crearSeccion = async function() {
     document.getElementById("nombreSeccion").value = "";
     await cargarSecciones();
   } catch (error) {
-    console.error("Error al verificar materia:", error);
+    console.error("Error al crear sección:", error);
     ocultarLoader();
-    await mostrarAlerta("No se pudo verificar el perfil. Intente de nuevo.", "error");
+    await mostrarAlerta("No se pudo crear la sección. Intente de nuevo.", "error");
   } finally {
     ocultarLoader();
   }
