@@ -402,7 +402,7 @@ footer {
 
 .btn-estudiante {
     width: 100%;
-    margin-top: 50px;
+    margin-top: 20px;
     background-color: #ffd700;
     color: #002b5c;
     padding: 12px;
@@ -696,8 +696,7 @@ footer {
 }
 
 .olvide{
-    padding: 5% !important; 
-    margin: auto !important;
+    margin-top: 20px;
 }
 
 .btn-volver {
