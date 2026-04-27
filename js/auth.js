@@ -164,7 +164,12 @@ window.login = async () => {
     }
   } catch (error) {
     ocultarLoader();
-    await mostrarAlerta(error, "error");
+    if(error === "FirebaseError: Firebase: Error (auth/invalid-credential)."){
+      await mostrarAlerta("Contraseña incorrecta", "error");
+    }else{
+       await mostrarAlerta(error, "error");
+    }
+   
   }
 };
 
