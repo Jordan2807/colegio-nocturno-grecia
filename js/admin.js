@@ -53,15 +53,11 @@ async function cargarUsuarios() {
     contenedorAdmins.innerHTML = "";
 
     const querySnapshot = await getDocs(collection(db, "usuarios"));
-    const inicioSesion = new Date(sessionStorage.getItem("inicioAdmin") || 0);
 
     let haySolicitudes = false, hayAdmins = false, hayProfesores = false;
 
     querySnapshot.forEach((docu) => {
       const data = docu.data();
-
-      const fecha = data.fecha ? new Date(data.fecha.seconds * 1000) : null;
-      const esNueva = fecha && fecha > inicioSesion && data.estado === "pendiente";
 
       if (data.rol === "admin") {
         if (usuarioActual && usuarioActual.uid === docu.id) return;
@@ -70,7 +66,8 @@ async function cargarUsuarios() {
         hayAdmins = true;
       } else if (data.rol === "profesor") {
         const tarjeta = crearTarjetaProfesor(docu.id, data);
-        if (esNueva) {
+        // Se muestran en "Solicitudes pendientes" todas las que tengan estado "pendiente"
+        if (data.estado === "pendiente") {
           solicitudes.innerHTML += tarjeta;
           haySolicitudes = true;
         } else {
