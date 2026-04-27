@@ -226,7 +226,17 @@ window.registrar = async () => {
     
   } catch (e) {
     ocultarLoader();
-    await mostrarAlerta("Error: " + e.message, "error");
+    // Manejo personalizado de errores
+    if (e.code === 'auth/invalid-email') {
+      await mostrarAlerta("Correo electrónico inválido. Verifica el formato.", "error");
+    } else if (e.code === 'auth/weak-password') {
+      await mostrarAlerta("La contraseña debe tener al menos 6 caracteres.", "error");
+    } else if (e.code === 'auth/email-already-in-use') {
+      await mostrarAlerta("Este correo ya está registrado. ¿Olvidaste tu contraseña?", "error");
+    } else {
+      // Para cualquier otro error, mostramos el mensaje original
+      await mostrarAlerta(e.message, "error");
+    }
   }
 };
 
